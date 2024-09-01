@@ -1,4 +1,4 @@
-﻿name: '🏗️ Build mod'
+﻿name: 'Build Template'
   
 on:
   workflow_call:
@@ -75,7 +75,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VALHEIM_INSTALL }}
-          key: ${{ env.VALHEIM_VERSION }}-${{ hashFiles('**/lockfiles') }}-BepInExPack-5.4.2202
+          key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL}}
 
       - name: Install SteamCMD
         if: steps.cachevalheim.outputs.cache-hit != 'true'
