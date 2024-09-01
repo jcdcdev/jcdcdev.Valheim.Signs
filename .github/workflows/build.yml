@@ -6,62 +6,12 @@ on:
   pull_request:
     branches:
       - "*"
+      
   workflow_dispatch:
 
-env:
-  PROJECT_NAME: jcdcdev.Valheim.Signs
-  PROJECT_DESCRIPTION: "Adds dynamic signs to Valheim"
-  PROJECT_URL: "https://github.com/jcdcdev/jcdcdev.Valheim.Signs"
-
+    
 jobs:
-  determine-version:
-    name: determine version
-    runs-on: ubuntu-latest
-    outputs:
-      semVer: ${{ steps.gitversion.outputs.semVer }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
-        with:
-          versionSpec: '5.x'
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0
   build:
-    name: build ${{ needs.determine-version.outputs.semVer }}
-    runs-on: ubuntu-latest
-    needs:
-      - determine-version
-    env:
-      SEMVER: ${{ needs.determine-version.outputs.semVer }}
-      ASSET_NAME: jcdcdev.Valheim.Signs-${{ needs.determine-version.outputs.semVer }}
-      PROJECT_PATH: ./src/jcdcdev.Valheim.Signs/jcdcdev.Valheim.Signs.csproj
-      BUILD_OUTPUT: ./build-output
-      MOD_OUTPUT: ./build-assets/jcdcdev.Valheim.Signs
-      SOLUTION_PATH: ./src/jcdcdev.Valheim.Signs.sln
-      ARTIFACT_OUTPUT: ./build-assets
-    outputs:
-      assetName: ${{ env.ASSET_NAME }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.2
-      - name: Restore Packages
-        run: nuget restore ${{ env.SOULTION_PATH }}
-      - name: Set version file
-        run: |
-          sed -i "s/1.0.0/${{ env.SEMVER }}/g" ./src/jcdcdev.Valheim.Signs/VersionInfo.cs
-      - name: Build Solution
-        run: |
-          msbuild.exe ${{ env.PROJECT_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.SEMVER }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}"
-      - name: Upload mod
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.ASSET_NAME }}
-          path: ${{ env.BUILD_OUTPUT }}/${{ env.PROJECT_NAME }}.dll
+    uses: ./.github/workflows/build-template.yml
+    with:
+      project-name: jcdcdev.Valheim.Signs
