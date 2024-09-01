@@ -1,5 +1,5 @@
-﻿name: 'Build Template'
-  
+﻿name: '[Template] Build'
+
 on:
   workflow_call:
     inputs:

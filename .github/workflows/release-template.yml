@@ -1,0 +1,139 @@
+name: '[Template] Release'
+
+on:
+  workflow_call:
+    inputs:
+      mod-name:
+        type: string
+        description: 'The name of the mod (e.g Signs)'
+        required: true
+      project-namespace:
+        type: string
+        description: 'The namespace of the project (e.g jcdcdev)'
+        required: true
+      project-description:
+        type: string
+        description: 'The description of the project'
+        required: true
+      project-url:
+        type: string
+        description: 'The url of the project'
+        required: true
+      project-community:
+        type: string
+        description: 'The community of the project'
+        required: true
+      project-categories:
+        type: string
+        description: 'The categories of the project'
+        required: true
+      mod-version:
+        type: string
+        description: 'The version of the mod'
+        required: true
+      asset-name:
+        type: string
+        description: 'The name of the asset'
+        required: true
+
+env:
+  PROJECT_NAMESPACE: ${{ inputs.project-namespace }}
+  MOD_NAME: ${{ inputs.mod-name }}
+  PROJECT_DESCRIPTION: ${{ inputs.project-description }}
+  PROJECT_URL: ${{ inputs.project-url }}
+  PROJECT_COMMUNITY: ${{ inputs.project-community }}
+  PROJECT_CATEGORIES: ${{ inputs.project-categories }}
+  MOD_VERSION: ${{ inputs.mod-version }}
+  ASSET_NAME: ${{ inputs.asset-name }}
+  MOD_PATH: ${{ github.workspace }}/mod
+  THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
+jobs:
+  create-release:
+    name: create release ${{ inputs.mod-name }} - ${{ inputs.mod-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - shell: bash
+        run: |
+          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '')
+          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+          git fetch --tags 
+          exists=$(git tag -l ${{ env.MOD_VERSION }})
+          if [ -z "$exists" ]; then
+              git config user.name "${{ github.actor }}"
+              git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+              git tag -a ${{ env.MOD_VERSION }} -m "Release ${{ env.MOD_VERSION }}"
+              git push origin ${{ env.MOD_VERSION }}
+          fi
+      - uses: jcdcdev/jcdcdev.Github.GenerateChangelog@main
+        id: changelog
+        with:
+          target-version: ${{ env.MOD_VERSION }}
+          previous-version: ${{ env.PREVIOUS_VERSION }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.MOD_PATH }}
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.MOD_PATH }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ env.MOD_VERSION }}
+          tag: ${{ env.MOD_VERSION }}
+          body: |
+            ## ${{ env.MOD_VERSION }}
+            
+            ### Changes
+
+            ${{ steps.changelog.outputs.changelog }}
+      - name: Create changelog file
+        shell: bash
+        run: |
+          changelog_file="${{ env.MOD_PATH }}/changelog.md"
+          if [ -f $changelog_file ]; then
+              echo "Changelog file already exists"
+              exit 0
+          fi
+
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases > releases.json
+          body=$(jq -r '.[] | "\(.body)\n\n"' releases.json)
+          changelog="# Changelog\n\n$body"
+          
+          echo -e $changelog > $changelog_file
+          echo -e $changelog
+      - name: Create icon and README
+        run: |
+          if [ -f ./icon.png ]; then
+              if [ ! -f ${{ env.MOD_PATH }}/icon.png ]; then
+                  echo "Copying icon.png"
+                  cp ./icon.png ${{ env.MOD_PATH }}
+              fi
+          fi
+
+          if [ -f ./README.md ]; then
+              if [ ! -f ${{ env.MOD_PATH }}/README.md ]; then
+                  echo "Copying README.md"
+                  cp ./README.md ${{ env.MOD_PATH }}
+              fi
+          fi
+      - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
+        id: push-to-thunderstore
+        with:
+          token: ${{ env.THUNDERSTORE_TOKEN }}
+          community: ${{ env.PROJECT_COMMUNITY }}
+          namespace: ${{ env.PROJECT_NAMESPACE }}
+          name: ${{ env.MOD_NAME }}
+          description: ${{ env.PROJECT_DESCRIPTION }}
+          version: ${{ env.MOD_VERSION }}
+          path: ${{ env.MOD_PATH }}
+          categories: ${{ env.PROJECT_CATEGORIES }}
+          website: ${{ env.PROJECT_URL }}

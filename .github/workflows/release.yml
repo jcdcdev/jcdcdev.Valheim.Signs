@@ -10,80 +10,27 @@ on:
       
   workflow_dispatch:
 
-env:
-  PROJECT_NAMESPACE: jcdcdev
-  PROJECT_NAME: jcdcdev.Valheim.Signs
-  PROJECT_DESCRIPTION: "Adds dynamic signs to Valheim"
-  PROJECT_URL: "https://github.com/jcdcdev/jcdcdev.Valheim.Signs"
-  PROJECT_COMMUNITY: "Valheim"
 jobs:
   build:
     uses: ./.github/workflows/build-template.yml
     with:
       project-name: jcdcdev.Valheim.Signs
-  create-release:
-    name: create release ${{ needs.build.outputs.mod-version }}
+  release:
+    uses: ./.github/workflows/release-template.yml
     needs:
       - build
-    runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      MOD_VERSION: ${{ needs.build.outputs.mod-version }}
-      ASSET_NAME: ${{ needs.build.outputs.asset-name }}
-      MOD_PATH: ${{ github.workspace }}/mod/
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Download package
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.ASSET_NAME }}
-          path: ${{ env.MOD_PATH }}
-      - shell: bash
-        run: |
-          echo "PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
-      - uses: jcdcdev/jcdcdev.Github.GenerateChangelog@main
-        id: changelog
-        with:
-          target-version: ${{ env.MOD_VERSION }}
-          previous-version: ${{ env.PREVIOUS_VERSION }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: GreenTF/upload-thunderstore-package@v4.3
-        id: push-to-thunderstore
-        with:
-          token: ${{ secrets.THUNDERSTORE_TOKEN }}
-          community: ${{ env.PROJECT_COMMUNITY }}
-          namespace: ${{ env.PROJECT_NAMESPACE }}
-          name: ${{ env.PROJECT_NAME }}
-          description: ${{ env.PROJECT_DESCRIPTION }}
-          version: ${{ env.MOD_VERSION }}
-          path: ${{ env.MOD_PATH }}
-          categories: |
-            Mods
-            Client-side
-            Tweaks
-          website: ${{ env.PROJECT_URL }}
-      - name: Download Mod
-        run: |
-          curl -L -o /release ${{ steps.push-to-thunderstore.outputs.url }}
-          ls -l /release
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: /release
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ env.MOD_VERSION }}
-          tag: ${{ env.MOD_VERSION }}
-          body: |
-            # ${{ env.MOD_VERSION }}
-            
-            [![Download](https://badgen.net/static/Download/${{ env.MOD_VERSION }})](${{ steps.push-to-thunderstore.outputs.url }})
-            
-            ## Changelog
-            [![Compare](https://badgen.net/static/Compare/${{ env.PREVIOUS_VERSION }}%20->%20${{ env.MOD_VERSION }})](https://github.com/${{ github.repository }}/compare/${{ env.PREVIOUS_VERSION }}...${{env.MOD_VERSION}})
-
-            ${{ steps.changelog.outputs.changelog }}
+    with:
+      mod-name: Signs
+      project-namespace: jcdcdev
+      project-description: "Add information about your world to signs! Easy to configure and use."
+      project-url: "https://github.com/jcdcdev/jcdcdev.Valheim.Signs"
+      project-community: "valheim"
+      project-categories: |
+        mods
+        client-side
+        tweaks
+      mod-version: ${{ needs.build.outputs.mod-version }}
+      asset-name: ${{ needs.build.outputs.asset-name }}
+    secrets: inherit
