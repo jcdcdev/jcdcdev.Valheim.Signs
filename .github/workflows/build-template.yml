@@ -1,0 +1,143 @@
+﻿name: '🏗️ Build mod'
+  
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        type: string
+        description: 'The name of the project (e.g jcdcdev.Valheim.Signs)'
+        required: true
+    outputs:
+      asset-name: 
+        description: 'The name of the asset uploaded'
+        value: ${{ jobs.build.outputs.asset-name }}
+      mod-version: 
+        description: 'The version of the mod'
+        value: ${{ jobs.determine-version.outputs.mod-version }}
+      valheim-version:
+        description: 'The version of Valheim'
+        value: ${{ jobs.determine-version.outputs.valheim-version }}
+
+jobs:
+  determine-version:
+    name: determine version
+    runs-on: ubuntu-latest
+    outputs:
+      mod-version: ${{ steps.gitversion.outputs.semVer }}
+      valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: '5.x'
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0
+      - name: Get Valheim version id
+        id: valheim-version
+        run: |
+          DATA=$(curl -s "https://api.steamcmd.net/v1/info/896660")
+          echo $DATA
+          VALHEIM_VERSION=$(echo $DATA | jq -r ".data.\"896660\".depots.branches.public.buildid")
+          echo $VALHEIM_VERSION
+          if [ "$VALHEIM_VERSION" == "null" ]; then
+              echo "Valheim version not found"
+              exit 1
+          fi
+          echo "valheim-version=$VALHEIM_VERSION" >> $GITHUB_OUTPUT
+  build:
+    name: build ${{ needs.determine-version.outputs.mod-version }}
+    runs-on: windows-latest
+    needs:
+      - determine-version
+    env:
+      MOD_VERSION: ${{ needs.determine-version.outputs.mod-version }}
+      ASSET_NAME: "${{ inputs.project-name }}-${{ needs.determine-version.outputs.mod-version }}"
+      PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
+      BUILD_OUTPUT: ${{ github.workspace }}/build-output/
+      MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
+      SOLUTION_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.sln
+      VALHEIM_INSTALL: ${{ github.workspace }}\valheim
+      VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
+      VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
+      BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-5.4.2202.zip
+    outputs:
+      asset-name: ${{ env.ASSET_NAME }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache Valheim
+        id: cachevalheim
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.VALHEIM_INSTALL }}
+          key: ${{ env.VALHEIM_VERSION }}-${{ hashFiles('**/lockfiles') }}-BepInExPack-5.4.2202
+
+      - name: Install SteamCMD
+        if: steps.cachevalheim.outputs.cache-hit != 'true'
+        uses: CyberAndrii/setup-steamcmd@v1
+
+      - name: Install Valheim
+        if: steps.cachevalheim.outputs.cache-hit != 'true'
+        run: |
+          steamcmd +force_install_dir ${{ env.VALHEIM_INSTALL }} +login anonymous +app_update 896660 validate +exit
+
+      - name: Install BepInEx
+        if: steps.cachevalheim.outputs.cache-hit != 'true'
+        run: |
+          Write-Host "Installing BepInEx"
+          
+          mkdir bepinex
+          Push-Location bepinex 
+          
+          Invoke-WebRequest -Uri ${{ env.BEPINEX_URL }} -OutFile bepinex.zip
+          Expand-Archive -Path bepinex.zip -DestinationPath "./"
+          mv BepInExPack_Valheim/* ${{ env.VALHEIM_INSTALL }}
+          
+          Pop-Location
+          Remove-Item bepinex -Recurse   
+
+      - name: Prepare Valheim
+        if: steps.cachevalheim.outputs.cache-hit != 'true'
+        run: |
+          mv ${{ env.VALHEIM_INSTALL }}/valheim_server_Data/ ${{ env.VALHEIM_INSTALL }}/valheim_Data/
+          $path = "${{ env.VALHEIM_INSTALL }}/valheim_server_Data/Managed/publicized_assemblies"
+          if (Test-Path "$path") {
+            Write-Host "Removing publicized assemblies"
+            Remove-Item "$path" -r
+          }
+
+          $FILES = Get-ChildItem -Path ${{ env.VALHEIM_INSTALL }} -Recurse
+          Write-Host "Valheim files:`n`n$FILES"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Restore Packages
+        run: |
+          nuget restore ${{ env.SOLUTION_PATH }}
+
+      - name: Set version file
+        run: |
+          $content = Get-Content ${{ env.VERSION_INFO_FILE }}
+          $updatedContent = $content -replace "1.0.0", "${{ env.MOD_VERSION }}"
+          Set-Content ${{ env.VERSION_INFO_FILE }} -Value $updatedContent    
+
+      - name: Build Solution
+        run: |
+          Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
+          msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
+
+      - name: Upload mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.MOD_OUTPUT }}
+          if-no-files-found: error

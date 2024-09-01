@@ -1,12 +1,17 @@
-name: Build
+name: '🏗️ Build mod'
+run-name: >
+  build ${{github.repository}} #${{ github.run_number }}
 
-on: 
-    workflow_dispatch:
+on:
+  pull_request:
+    branches:
+      - "*"
+      
+  workflow_dispatch:
 
+    
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Say Hello
-      run: echo "Hello, World!"
+    uses: ./.github/workflows/build-template.yml
+    with:
+      project-name: jcdcdev.Valheim.Signs
