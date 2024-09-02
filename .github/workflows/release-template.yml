@@ -39,6 +39,10 @@ on:
         type: string
         description: 'The name of the asset'
         required: true
+      nexus-mod-game:
+        type: string
+        description: 'The game of the Nexus Mod'
+        required: true
 
 env:
   PROJECT_NAMESPACE: ${{ inputs.project-namespace }}
@@ -52,6 +56,10 @@ env:
   ASSET_NAME: ${{ inputs.asset-name }}
   MOD_PATH: ${{ github.workspace }}/mod
   THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
+  NEXUS_MOD_ID: ${{ secrets.NEXUS_MOD_ID }}
+  NEXUS_MOD_KEY: ${{ secrets.NEXUS_MOD_KEY }}
+  NEXUS_MOD_SESSION: ${{ secrets.NEXUS_MOD_SESSION }}
+  NEXUS_MOD_GAME: ${{ inputs.nexus-mod-game }}
 jobs:
   create-release:
     name: create release ${{ inputs.project-name }} - ${{ inputs.project-version }}
@@ -130,15 +138,6 @@ jobs:
           
           $changelog = $changelog -replace '\n', "`n"
           Set-Content -Path $changelog_file -Value $changelog -NoNewline
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ${{ env.MOD_PATH }}/*
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ env.MOD_VERSION }}
-          tag: ${{ env.MOD_VERSION }}
-          body: ${{ steps.update-changelog.outputs.changelog }}
       - name: Create icon and README
         shell: pwsh
         run: |
@@ -164,6 +163,27 @@ jobs:
             Write-Error "No dlls found in $path"
             exit 1
           }
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.MOD_PATH }}/*.dll
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ env.MOD_VERSION }}
+          tag: ${{ env.MOD_VERSION }}
+          body: ${{ steps.update-changelog.outputs.changelog }}
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install Digitalroot.ModUploader
+        run: dotnet tool install -g Digitalroot.ModUploader
+      - name: Run Digitalroot.ModUploader
+        run: |
+          mkdir -p ./nexus
+          zipPath="./nexus/${{ env.ASSET_NAME }}.zip"        
+          zip -r $zipPath ${{ env.MOD_PATH }}/*.dll
+          drmu nexusmods upload ${{ env.NEXUS_MOD_ID }} "$zipPath" -v "${{ env.MOD_VERSION }}" -f "${{ env.MOD_VERSION }}" -t Main -ddwm -dmv -d "${{ env.PROJECT_DESCRIPTION }}" -k "${{ env.NEXUS_MOD_KEY }}" -nmsc "${{ env.NEXUS_MOD_SESSION }}" -g "${{ env.NEXUS_MOD_GAME }}"
       - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         id: push-to-thunderstore
         with:

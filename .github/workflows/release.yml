@@ -35,4 +35,5 @@ jobs:
       project-version: ${{ needs.build.outputs.mod-version }}
       asset-name: ${{ needs.build.outputs.asset-name }}
       project-dependencies: ${{ needs.build.outputs.mod-dependencies }}
+      nexus-mod-game: "valheim"
     secrets: inherit
