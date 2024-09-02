@@ -1,11 +1,15 @@
-﻿name: '🏗️ Build mod'
-  
+﻿name: '[Template] Build'
+
 on:
   workflow_call:
     inputs:
       project-name:
         type: string
         description: 'The name of the project (e.g jcdcdev.Valheim.Signs)'
+        required: true
+      bepinex-version:
+        type: string
+        description: 'The version of BepInEx to use'
         required: true
     outputs:
       asset-name: 
@@ -17,6 +21,9 @@ on:
       valheim-version:
         description: 'The version of Valheim'
         value: ${{ jobs.determine-version.outputs.valheim-version }}
+      project-dependencies:
+        description: 'The dependencies of the project'
+        value: "denikson-BepInExPack_Valheim@${{ inputs.bepinex-version }}"
 
 jobs:
   determine-version:
@@ -63,7 +70,7 @@ jobs:
       VALHEIM_INSTALL: ${{ github.workspace }}\valheim
       VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
       VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
-      BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-5.4.2202.zip
+      BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}.zip
     outputs:
       asset-name: ${{ env.ASSET_NAME }}
     steps:
@@ -75,7 +82,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VALHEIM_INSTALL }}
-          key: ${{ env.VALHEIM_VERSION }}-${{ hashFiles('**/lockfiles') }}-BepInExPack-5.4.2202
+          key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL}}
 
       - name: Install SteamCMD
         if: steps.cachevalheim.outputs.cache-hit != 'true'
