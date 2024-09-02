@@ -60,6 +60,8 @@ env:
   NEXUS_MOD_KEY: ${{ secrets.NEXUS_MOD_KEY }}
   NEXUS_MOD_SESSION: ${{ secrets.NEXUS_MOD_SESSION }}
   NEXUS_MOD_GAME: ${{ inputs.nexus-mod-game }}
+  MOD_ZIP_PATH: "${{ github.workspace }}/mod_zip/${{ inputs.project-name }}-${{ inputs.project-version }}.zip"
+  FILE_NAME: "${{ inputs.project-name }}-${{ inputs.project-version }}"
 jobs:
   create-release:
     name: create release ${{ inputs.project-name }} - ${{ inputs.project-version }}
@@ -152,7 +154,7 @@ jobs:
                 }
               }
           }
-      - name: Verify Package
+      - name: Compress Package
         shell: pwsh
         run: |
           $path = "${{ env.MOD_PATH }}"
@@ -163,6 +165,21 @@ jobs:
             Write-Error "No dlls found in $path"
             exit 1
           }
+          
+          $zipPath = "${{ env.MOD_ZIP_PATH }}"
+          $zipDir = Split-Path $zipPath
+          if (-not (Test-Path $zipDir)) {
+            New-Item -ItemType Directory -Path $zipDir -Force
+          }
+          
+          Push-Location $path
+          Compress-Archive -Path .\* -DestinationPath $zipPath -Force
+          Pop-Location
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}-mod.zip
+          path: ${{ env.MOD_ZIP_PATH }}
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
@@ -179,11 +196,7 @@ jobs:
       - name: Install Digitalroot.ModUploader
         run: dotnet tool install -g Digitalroot.ModUploader
       - name: Run Digitalroot.ModUploader
-        run: |
-          mkdir -p ./nexus
-          zipPath="./nexus/${{ env.ASSET_NAME }}.zip"        
-          zip -r $zipPath ${{ env.MOD_PATH }}/*.dll
-          drmu nexusmods upload ${{ env.NEXUS_MOD_ID }} "$zipPath" -v "${{ env.MOD_VERSION }}" -f "${{ env.MOD_VERSION }}" -t Main -ddwm -dmv -d "${{ env.PROJECT_DESCRIPTION }}" -k "${{ env.NEXUS_MOD_KEY }}" -nmsc "${{ env.NEXUS_MOD_SESSION }}" -g "${{ env.NEXUS_MOD_GAME }}"
+        run: drmu nexusmods upload ${{ env.NEXUS_MOD_ID }} "${{ env.MOD_ZIP_PATH }}" -v "${{ env.MOD_VERSION }}" -f "${{ env.FILE_NAME }}" -t Main -ddwm -dmv -d "${{ env.PROJECT_DESCRIPTION }}" -k "${{ env.NEXUS_MOD_KEY }}" -nmsc "${{ env.NEXUS_MOD_SESSION }}" -g "${{ env.NEXUS_MOD_GAME }}"
       - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         id: push-to-thunderstore
         with:
