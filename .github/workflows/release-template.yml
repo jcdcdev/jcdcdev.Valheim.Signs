@@ -127,6 +127,9 @@ jobs:
           $changelog="# Changelog`n${{ env.LATEST_CHANGELOG }}"          
           $releases | ForEach-Object {
             $release = $_
+            if ($release.tag_name -eq ${{ env.MOD_VERSION }}) {
+              return
+            }
             $body = $release.body
             $body = $body -replace '\r\n', "`n"
             write-host "$body"
@@ -136,6 +139,12 @@ jobs:
           $terms = 'close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved'
           $terms | ForEach-Object {
             $changelog = $changelog -replace "($_ #(\d+))", '[Issue #$2](https://github.com/${{ env.REPO }}/issues/$2)'
+          }
+          
+          $commit_hashes = git log --pretty=format:"%h"
+          $commit_hashes | ForEach-Object {
+            $commit_hash = $_
+            $changelog = $changelog -replace "($commit_hash)", "[$commit_hash](https://github.com/${{ env.REPO }}/commit/$commit_hash)"
           }
           
           $changelog = $changelog -replace '\n', "`n"
