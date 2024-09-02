@@ -63,7 +63,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - shell: bash
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.MOD_PATH }}
+      - name: Create tag
+        shell: bash
         run: |
           PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '')
           echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
@@ -81,55 +87,76 @@ jobs:
           target-version: ${{ env.MOD_VERSION }}
           previous-version: ${{ env.PREVIOUS_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download package
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.ASSET_NAME }}
-          path: ${{ env.MOD_PATH }}
+      - name: Update changelog
+        id: update-changelog
+        env:
+          CHANGELOG: |
+            ## ${{ env.MOD_VERSION }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+        run: |
+          {
+            echo 'changelog<<EOF'
+            echo "${CHANGELOG}"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - name: Create changelog file
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LATEST_CHANGELOG: ${{ steps.update-changelog.outputs.changelog }}
+          REPO: "${{ github.repository_owner }}/${{ github.event.repository.name }}"
+        run: |
+          $changelog_file = "${{ env.MOD_PATH }}/CHANGELOG.md"
+          if (Test-Path $changelog_file) {
+            Write-Host "Changelog already exists"
+            exit 0
+          }
+          
+          New-Item -Path $changelog_file -ItemType File -Force
+
+          $jq = "sort_by(.tag_name) | reverse | .[]" 
+          $releases = gh api "repos/${{ env.REPO }}/releases" --jq "$jq" | ConvertFrom-Json
+          
+          $changelog="# Changelog`n${{ env.LATEST_CHANGELOG }}"          
+          $releases | ForEach-Object {
+            $release = $_
+            $body = $release.body
+            $body = $body -replace '\r\n', "`n"
+            write-host "$body"
+            $changelog += "`n$body"
+          }
+
+          $terms = 'close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved'
+          $terms | ForEach-Object {
+            $changelog = $changelog -replace "($_ #(\d+))", '[Issue #$2](https://github.com/${{ env.REPO }}/issues/$2)'
+          }
+          
+          $changelog = $changelog -replace '\n', "`n"
+          Set-Content -Path $changelog_file -Value $changelog -NoNewline
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ${{ env.MOD_PATH }}
+          artifacts: ${{ env.MOD_PATH }}/*
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ env.MOD_VERSION }}
           tag: ${{ env.MOD_VERSION }}
-          body: |
-            ## ${{ env.MOD_VERSION }}
-            
-            ### Changes
-
-            ${{ steps.changelog.outputs.changelog }}
-      - name: Create changelog file
-        shell: bash
-        run: |
-          changelog_file="${{ env.MOD_PATH }}/CHANGELOG.md"
-          if [ -f $changelog_file ]; then
-              echo "Changelog file already exists"
-              exit 0
-          fi
-
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases > releases.json
-          body=$(jq -r '.[] | "\(.body)\n\n"' releases.json)
-          changelog="# Changelog\n\n$body"
-          
-          echo -e $changelog > $changelog_file
-          echo -e $changelog
+          body: ${{ steps.update-changelog.outputs.changelog }}
       - name: Create icon and README
+        shell: pwsh
         run: |
-          if [ -f ./icon.png ]; then
-              if [ ! -f ${{ env.MOD_PATH }}/icon.png ]; then
-                  echo "Copying icon.png"
-                  cp ./icon.png ${{ env.MOD_PATH }}
-              fi
-          fi
-
-          if [ -f ./README.md ]; then
-              if [ ! -f ${{ env.MOD_PATH }}/README.md ]; then
-                  echo "Copying README.md"
-                  cp ./README.md ${{ env.MOD_PATH }}
-              fi
-          fi
+          $files = @('icon.png', 'README.md')
+          $files | ForEach-Object {
+              $file = $_
+              $path = "${{ env.MOD_PATH }}/$file"
+              if (Test-Path $file) {              
+                if (-not (Test-Path $path)) {
+                  Write-Host "Copying $file to $path"
+                  Copy-Item $file $path
+                }
+              }
+          }
       - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         id: push-to-thunderstore
         with:
