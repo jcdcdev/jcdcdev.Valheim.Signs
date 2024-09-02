@@ -21,10 +21,12 @@ on:
       valheim-version:
         description: 'The version of Valheim'
         value: ${{ jobs.determine-version.outputs.valheim-version }}
-      project-dependencies:
-        description: 'The dependencies of the project'
-        value: "denikson-BepInExPack_Valheim@${{ inputs.bepinex-version }}"
-
+      mod-dependencies:
+        description: 'The dependencies of the mod'
+        value: ${{ jobs.determine-version.outputs.mod-dependencies }}
+env:
+  BEPINEX_MOD_NAME: denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}
+  BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}.zip
 jobs:
   determine-version:
     name: determine version
@@ -32,6 +34,7 @@ jobs:
     outputs:
       mod-version: ${{ steps.gitversion.outputs.semVer }}
       valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
+      mod-dependencies: ${{ steps.valheim-version.outputs.mod-dependencies }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,6 +58,7 @@ jobs:
               exit 1
           fi
           echo "valheim-version=$VALHEIM_VERSION" >> $GITHUB_OUTPUT
+          echo "mod-dependencies=${{ env.BEPINEX_MOD_NAME }}" >> $GITHUB_OUTPUT
   build:
     name: build ${{ needs.determine-version.outputs.mod-version }}
     runs-on: windows-latest
@@ -70,7 +74,6 @@ jobs:
       VALHEIM_INSTALL: ${{ github.workspace }}\valheim
       VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
       VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
-      BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}.zip
     outputs:
       asset-name: ${{ env.ASSET_NAME }}
     steps:
@@ -82,7 +85,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VALHEIM_INSTALL }}
-          key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL}}
+          key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL }}
 
       - name: Install SteamCMD
         if: steps.cachevalheim.outputs.cache-hit != 'true'

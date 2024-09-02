@@ -103,7 +103,7 @@ jobs:
       - name: Create changelog file
         shell: bash
         run: |
-          changelog_file="${{ env.MOD_PATH }}/changelog.md"
+          changelog_file="${{ env.MOD_PATH }}/CHANGELOG.md"
           if [ -f $changelog_file ]; then
               echo "Changelog file already exists"
               exit 0
