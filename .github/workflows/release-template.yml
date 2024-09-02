@@ -63,30 +63,26 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Download package
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.ASSET_NAME }}
-          path: ${{ env.MOD_PATH }}
       - name: Create tag
         shell: bash
         run: |
           PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '')
           echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
-          git fetch --tags 
-          exists=$(git tag -l ${{ env.MOD_VERSION }})
-          if [ -z "$exists" ]; then
-              git config user.name "${{ github.actor }}"
-              git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-              git tag -a ${{ env.MOD_VERSION }} -m "Release ${{ env.MOD_VERSION }}"
-              git push origin ${{ env.MOD_VERSION }}
-          fi
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git tag -fa ${{ env.MOD_VERSION }} -m "Release ${{ env.MOD_VERSION }}"
+          git push --force origin ${{ env.MOD_VERSION }}
       - uses: jcdcdev/jcdcdev.Github.GenerateChangelog@main
         id: changelog
         with:
           target-version: ${{ env.MOD_VERSION }}
           previous-version: ${{ env.PREVIOUS_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.MOD_PATH }}
       - name: Update changelog
         id: update-changelog
         env:
@@ -156,6 +152,17 @@ jobs:
                   Copy-Item $file $path
                 }
               }
+          }
+      - name: Verify Package
+        shell: pwsh
+        run: |
+          $path = "${{ env.MOD_PATH }}"
+          $files = Get-ChildItem -Path $path -Recurse
+          Write-Host "Files to package:`n`n$files"       
+          $dlls = $files | Where-Object { $_.Extension -eq '.dll' }
+          if ($dlls.Count -eq 0) {
+            Write-Error "No dlls found in $path"
+            exit 1
           }
       - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         id: push-to-thunderstore
