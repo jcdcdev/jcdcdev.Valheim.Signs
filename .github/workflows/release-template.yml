@@ -93,26 +93,14 @@ jobs:
         with:
           name: ${{ env.ASSET_NAME }}
           path: ${{ env.MOD_PATH }}
-      - name: Update changelog
-        id: update-changelog
-        env:
-          CHANGELOG: |
-            ## ${{ env.MOD_VERSION }}
-            
-            ${{ steps.changelog.outputs.changelog }}
-        run: |
-          {
-            echo 'changelog<<EOF'
-            echo "${CHANGELOG}"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
       - name: Create changelog file
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LATEST_CHANGELOG: ${{ steps.update-changelog.outputs.changelog }}
+          LATEST_CHANGELOG: ${{ steps.changelog.outputs.changelog }}
           REPO: "${{ github.repository_owner }}/${{ github.event.repository.name }}"
         run: |
+          Write-Host "LATEST_CHANGELOG:`n`n${{ env.LATEST_CHANGELOG }}`n`n"
           $changelog_file = "${{ env.MOD_PATH }}/CHANGELOG.md"
           if (Test-Path $changelog_file) {
             Write-Host "Changelog already exists"
@@ -135,20 +123,10 @@ jobs:
             write-host "$body"
             $changelog += "`n$body"
           }
-
-          $terms = 'close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved'
-          $terms | ForEach-Object {
-            $changelog = $changelog -replace "($_ #(\d+))", '[Issue #$2](https://github.com/${{ env.REPO }}/issues/$2)'
-          }
-          
-          $commit_hashes = git log --pretty=format:"%h"
-          $commit_hashes | ForEach-Object {
-            $commit_hash = $_
-            $changelog = $changelog -replace "($commit_hash)", "[$commit_hash](https://github.com/${{ env.REPO }}/commit/$commit_hash)"
-          }
-          
+    
           $changelog = $changelog -replace '\n', "`n"
           Set-Content -Path $changelog_file -Value $changelog -NoNewline
+          Write-Host "FINAL CHANGELOG:`n`n$changelog`n`n"
       - name: Create icon and README
         shell: pwsh
         run: |
@@ -189,6 +167,8 @@ jobs:
         with:
           name: ${{ env.ASSET_NAME }}-mod.zip
           path: ${{ env.MOD_ZIP_PATH }}
+      - name: Fail Early
+        run: exit 1
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
