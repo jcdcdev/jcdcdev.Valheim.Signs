@@ -122,8 +122,8 @@ jobs:
             $body = $release.body
             $body = $body -replace '\r\n', "`n"
             $releaseBody = "## $($release.tag_name)`n$body"
-            write-host "$body"
-            $changelog += "`n$body"
+            write-host "$releaseBody"
+            $changelog += "`n$releaseBody"
           }
     
           $changelog = $changelog -replace '\n', "`n"
