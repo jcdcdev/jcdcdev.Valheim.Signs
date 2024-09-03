@@ -36,7 +36,7 @@ jobs:
       valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
       mod-dependencies: ${{ steps.valheim-version.outputs.mod-dependencies }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install GitVersion
@@ -78,7 +78,7 @@ jobs:
       asset-name: ${{ env.ASSET_NAME }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache Valheim
         id: cachevalheim
