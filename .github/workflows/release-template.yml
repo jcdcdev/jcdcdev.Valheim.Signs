@@ -76,8 +76,6 @@ jobs:
       - name: Create tag
         shell: bash
         run: |
-          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '')
-          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git tag -fa ${{ env.MOD_VERSION }} -m "Release ${{ env.MOD_VERSION }}"
@@ -85,7 +83,7 @@ jobs:
       - uses: jcdcdev/jcdcdev.Github.GenerateChangelog@main
         id: changelog
         with:
-          target-version: ${{ env.MOD_VERSION }}
+          version: ${{ env.MOD_VERSION }}
           previous-version: ${{ env.PREVIOUS_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download package
@@ -97,7 +95,10 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LATEST_CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+          LATEST_CHANGELOG: | 
+            ## ${{ env.MOD_VERSION }}
+
+            ${{ steps.changelog.outputs.changelog }}
           REPO: "${{ github.repository_owner }}/${{ github.event.repository.name }}"
         run: |
           Write-Host "LATEST_CHANGELOG:`n`n${{ env.LATEST_CHANGELOG }}`n`n"
@@ -120,6 +121,7 @@ jobs:
             }
             $body = $release.body
             $body = $body -replace '\r\n', "`n"
+            $releaseBody = "## $($release.tag_name)`n$body"
             write-host "$body"
             $changelog += "`n$body"
           }
@@ -172,12 +174,12 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ${{ env.MOD_PATH }}/*.dll
+          artifacts: ${{ env.MOD_ZIP_PATH }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ env.MOD_VERSION }}
           tag: ${{ env.MOD_VERSION }}
-          body: ${{ steps.update-changelog.outputs.changelog }}
+          body: ${{ steps.changelog.outputs.changelog }}
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
