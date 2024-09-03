@@ -169,8 +169,6 @@ jobs:
         with:
           name: ${{ env.ASSET_NAME }}-mod.zip
           path: ${{ env.MOD_ZIP_PATH }}
-      - name: Fail Early
-        run: exit 1
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
