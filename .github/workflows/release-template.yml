@@ -84,7 +84,6 @@ jobs:
         id: changelog
         with:
           version: ${{ env.MOD_VERSION }}
-          previous-version: ${{ env.PREVIOUS_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download package
         uses: actions/download-artifact@v4

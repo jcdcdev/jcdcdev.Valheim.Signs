@@ -41,7 +41,7 @@ namespace jcdcdev.Valheim.Signs
 
         private const string Name = "jcdcdev - Dynamic Signs";
         private const string PluginId = "jcdcdev.valheim.signs";
-        public static SignsPlugin Instance => _instance ?? throw new System.InvalidOperationException("Plugin is not loaded");
+        public static SignsPlugin Instance => _instance ?? throw new InvalidOperationException("Plugin is not loaded");
         private static SignsPlugin? _instance;
         private Harmony? _harmony;
 
@@ -93,15 +93,13 @@ namespace jcdcdev.Valheim.Signs
         {
             var match = RegexPattern.Match(originalText);
             var originalValue = match.Groups[1].Value;
-            if (!match.Success)
+            if (match.Success)
             {
-                Logger.LogInfo($"No match found in text {originalText}");
-                return null;
+                return originalValue;
             }
 
-            Logger.LogInfo($"Extracted: {originalValue}");
-
-            return originalValue;
+            Logger.LogInfo($"No match found in text {originalText}");
+            return null;
         }
 
         public bool GetSignHoverText(Sign sign, string originalText, out string output)

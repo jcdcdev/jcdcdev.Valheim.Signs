@@ -143,7 +143,7 @@ jobs:
       - name: Build Solution
         run: |
           Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
-          msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
+          msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
 
       - name: Upload mod
         uses: actions/upload-artifact@v4
