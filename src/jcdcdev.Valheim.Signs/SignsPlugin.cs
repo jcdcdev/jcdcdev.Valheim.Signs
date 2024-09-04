@@ -77,7 +77,7 @@ namespace jcdcdev.Valheim.Signs
                     continue;
                 }
 
-                var newValue = converter.GetSignText(sign, originalText);
+                var newValue = converter.GetSignText(sign, originalValue);
                 if (newValue == null || newValue.IsNullOrWhiteSpace())
                 {
                     continue;
@@ -93,13 +93,7 @@ namespace jcdcdev.Valheim.Signs
         {
             var match = RegexPattern.Match(originalText);
             var originalValue = match.Groups[1].Value;
-            if (match.Success)
-            {
-                return originalValue;
-            }
-
-            Logger.LogInfo($"No match found in text {originalText}");
-            return null;
+            return match.Success ? originalValue : null;
         }
 
         public bool GetSignHoverText(Sign sign, string originalText, out string output)

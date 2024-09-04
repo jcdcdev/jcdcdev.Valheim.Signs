@@ -5,7 +5,7 @@ namespace jcdcdev.Valheim.Signs.Extensions
 {
     public static class TimeExtensions
     {
-        private static float Fraction =>  (float)(AccessTools.Field(typeof(EnvMan), "m_smoothDayFraction")?.GetValue(EnvMan.instance) ?? 0f);
+        private static float Fraction => (float)(AccessTools.Field(typeof(EnvMan), nameof(EnvMan.m_smoothDayFraction))?.GetValue(EnvMan.instance) ?? 0f);
 
         public static string GetFuzzyTime()
         {
@@ -15,11 +15,7 @@ namespace jcdcdev.Valheim.Signs.Extensions
             return $"{fuzzyTime}";
         }
 
-        public static string GetCurrentDay()
-        {
-            var currentDay = EnvMan.instance.GetCurrentDay();
-            return $"{currentDay}";
-        }
+        public static string? GetCurrentDay() => AccessTools.Method(typeof(EnvMan), nameof(EnvMan.GetCurrentDay))?.Invoke(EnvMan.instance, null)?.ToString();
 
         public static string GetCurrentTimeString(string? format = "HH:mm")
         {
