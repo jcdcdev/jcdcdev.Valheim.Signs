@@ -1,6 +1,5 @@
 ﻿using System;
 using HarmonyLib;
-using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 
@@ -9,23 +8,27 @@ namespace jcdcdev.Valheim.Signs.Patches
     [HarmonyPatch(typeof(Sign), nameof(Sign.UpdateText))]
     public static class SignUpdateText
     {
-        public static void Postfix(Sign __instance, ref ZNetView ___m_nview)
+        public static void Postfix(Sign __instance)
         {
-            var originalText = __instance.m_textWidget.text;
+            if (!__instance.m_nview?.IsValid() ?? true)
+            {
+                return;
+            }
+
             try
             {
-                if (!SignsPlugin.Instance.GetSignText(__instance, originalText, out var output))
+                if (!SignsPlugin.Instance.GetSignText(__instance, __instance.m_currentText, out var output))
                 {
                     return;
                 }
 
-                ___m_nview.ClaimOwnership();
+                __instance.m_nview.ClaimOwnership();
                 __instance.m_textWidget.text = output;
-                ___m_nview.GetZDO().Set("newText", output);
+                __instance.m_nview.GetZDO().Set("newText", output);
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex);
+                SignsPlugin.Log.LogError(ex);
             }
         }
     }
