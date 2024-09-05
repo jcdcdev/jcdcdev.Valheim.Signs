@@ -9,8 +9,13 @@ namespace jcdcdev.Valheim.Signs.Extensions
 
         public static string GetFuzzyTime()
         {
-            var fuzzyOptions = new[] { "Dawn", "Morning", "Noon", "Afternoon", "Dusk", "Night" };
-            var index = Math.Min((int)(fuzzyOptions.Length * Fraction), fuzzyOptions.Length - 1);
+            var fuzzyOptions = new[]
+            {
+                "Midnight", "Early Morning", "Early Morning", "Before Dawn", "Before Dawn", "Dawn", "Dawn", "Morning", "Morning", "Late Morning",
+                "Late Morning", "Midday", "Midday", "Early Afternoon", "Early Afternoon", "Afternoon", "Afternoon", "Evening", "Evening", "Night", "Night",
+                "Late Night", "Late Night", "Midnight"
+            };
+            var index = Math.Min((int)(fuzzyOptions.Length * SmoothDayFraction), fuzzyOptions.Length - 1);
             var fuzzyTime = fuzzyOptions[index];
             return $"{fuzzyTime}";
         }
