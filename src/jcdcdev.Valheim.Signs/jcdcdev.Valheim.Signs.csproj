@@ -14,11 +14,12 @@
         <FileAlignment>512</FileAlignment>
         <LangVersion>8</LangVersion>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
+        <DebugType>pdbonly</DebugType>
         <Optimize>false</Optimize>
         <OutputPath>bin\Debug\</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -52,6 +53,7 @@
         <Compile Include="Converters\GameTimeSign.cs"/>
         <Compile Include="Converters\IAmADynamicSign.cs"/>
         <Compile Include="Converters\OnlineCount.cs"/>
+        <Compile Include="Extensions\StringExtensions.cs" />
         <Compile Include="Extensions\TimeExtensions.cs" />
         <Compile Include="Patches\SignGetHoverText.cs"/>
         <Compile Include="Patches\SignUpdateText.cs"/>
@@ -69,8 +71,5 @@
             <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
         </PropertyGroup>
         <Error Condition="!Exists('..\packages\JotunnLib.2.20.3\build\JotunnLib.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JotunnLib.2.20.3\build\JotunnLib.props'))"/>
-    </Target>
-    <Target Name="CopyToPluginFolder" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT' AND '$(Configuration)' == 'Debug'">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(VALHEIM_INSTALL)\BepInEx\plugins"/>
     </Target>
 </Project>

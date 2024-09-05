@@ -1,11 +1,11 @@
 ﻿using System;
-using HarmonyLib;
 
 namespace jcdcdev.Valheim.Signs.Extensions
 {
     public static class TimeExtensions
     {
-        private static float Fraction => (float)(AccessTools.Field(typeof(EnvMan), nameof(EnvMan.m_smoothDayFraction))?.GetValue(EnvMan.instance) ?? 0f);
+        private static float SmoothDayFraction => EnvMan.instance.m_smoothDayFraction;
+        public static int CurrentDay => EnvMan.instance.GetCurrentDay();
 
         public static string GetFuzzyTime()
         {
@@ -15,13 +15,11 @@ namespace jcdcdev.Valheim.Signs.Extensions
             return $"{fuzzyTime}";
         }
 
-        public static string? GetCurrentDay() => AccessTools.Method(typeof(EnvMan), nameof(EnvMan.GetCurrentDay))?.Invoke(EnvMan.instance, null)?.ToString();
-
         public static string GetCurrentTimeString(string? format = "HH:mm")
         {
-            var hour = (int)(Fraction * 24f);
-            var minute = (int)((Fraction * 24f - hour) * 60f);
-            var second = (int)(((Fraction * 24f - hour) * 60f - minute) * 60f);
+            var hour = (int)(SmoothDayFraction * 24f);
+            var minute = (int)((SmoothDayFraction * 24f - hour) * 60f);
+            var second = (int)(((SmoothDayFraction * 24f - hour) * 60f - minute) * 60f);
 
             var now = DateTime.Now;
             var dateTimeNow = new DateTime(now.Year, now.Month, now.Day, hour, minute, second);

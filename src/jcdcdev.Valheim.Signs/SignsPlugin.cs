@@ -4,6 +4,7 @@ using System.Reflection;
 using HarmonyLib;
 using System.Text.RegularExpressions;
 using BepInEx;
+using BepInEx.Logging;
 using jcdcdev.Valheim.Signs.Converters;
 using JetBrains.Annotations;
 
@@ -37,8 +38,8 @@ namespace jcdcdev.Valheim.Signs
             _dynamicSigns = signs.ToArray();
         }
 
+        public static readonly ManualLogSource Log = new ManualLogSource(Name);
         private readonly IAmADynamicSign[] _dynamicSigns;
-
         private const string Name = "jcdcdev - Dynamic Signs";
         private const string PluginId = "jcdcdev.valheim.signs";
         public static SignsPlugin Instance => _instance ?? throw new InvalidOperationException("Plugin is not loaded");
@@ -118,8 +119,9 @@ namespace jcdcdev.Valheim.Signs
                     continue;
                 }
 
+                var regex = new Regex("\"([^\"]*)\"");
                 hover = $"[<color=\"yellow\">DYNAMIC</color>] {hover}";
-                output = RegexPattern.Replace(originalText, hover, 1);
+                output = regex.Replace(originalText, $"\"{hover}\"");
             }
 
             return output != originalText;
