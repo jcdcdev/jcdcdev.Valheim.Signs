@@ -55,6 +55,7 @@
         <Compile Include="Converters\OnlineCount.cs"/>
         <Compile Include="Converters\ActualTimeSign.cs" />
         <Compile Include="Converters\PlayerHealthSign.cs" />
+        <Compile Include="Converters\PlayerStaminaSign.cs" />
         <Compile Include="Extensions\StringExtensions.cs" />
         <Compile Include="Extensions\TimeExtensions.cs" />
         <Compile Include="Patches\SignGetHoverText.cs"/>
