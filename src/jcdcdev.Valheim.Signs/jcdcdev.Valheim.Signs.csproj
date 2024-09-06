@@ -53,6 +53,7 @@
         <Compile Include="Converters\GameTimeSign.cs"/>
         <Compile Include="Converters\IAmADynamicSign.cs"/>
         <Compile Include="Converters\OnlineCount.cs"/>
+        <Compile Include="Converters\ActualTimeSign.cs" />
         <Compile Include="Extensions\StringExtensions.cs" />
         <Compile Include="Extensions\TimeExtensions.cs" />
         <Compile Include="Patches\SignGetHoverText.cs"/>
