@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using jcdcdev.Valheim.Signs.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters
@@ -10,14 +9,7 @@ namespace jcdcdev.Valheim.Signs.Converters
 
         public string? GetSignText(Sign sign, string originalText)
         {
-            var split = originalText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            var option = split.LastOrDefault();
-            var format = option?.ToLowerInvariant() switch
-            {
-                "12" => "h:mm tt",
-                _ => "HH:mm"
-            };
-
+            var format = TimeExtensions.GetTimeFormat(originalText);
             return TimeExtensions.GetCurrentTimeString(format);
         }
 

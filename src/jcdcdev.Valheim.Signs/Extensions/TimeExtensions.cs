@@ -1,9 +1,35 @@
 ﻿using System;
+using System.Linq;
 
 namespace jcdcdev.Valheim.Signs.Extensions
 {
     public static class TimeExtensions
     {
+        public static string GetTimeFormat(string? originalText)
+        {
+            if (originalText == null || string.IsNullOrWhiteSpace(originalText))
+            {
+                return "HH:mm";
+            }
+
+            var split = originalText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var options = split.Skip(1).ToList();
+            var twelveHourClock = options.Any(x => x == "12");
+            var option = options.LastOrDefault(x => x != "12");
+            return option switch
+            {
+                "s" => twelveHourClock ? "h:mm:ss tt" : "HH:mm:ss",
+                "f" => "f",
+                "F" => "F",
+                "g" => "g",
+                "G" => "G",
+                "r" => "r",
+                "R" => "R",
+                "U" => "U",
+                _ => twelveHourClock ? "h:mm tt" : "HH:mm"
+            };
+        }
+
         private static float SmoothDayFraction => EnvMan.instance.m_smoothDayFraction;
         public static int CurrentDay => EnvMan.instance.GetCurrentDay();
 
@@ -29,6 +55,13 @@ namespace jcdcdev.Valheim.Signs.Extensions
             var now = DateTime.Now;
             var dateTimeNow = new DateTime(now.Year, now.Month, now.Day, hour, minute, second);
             return dateTimeNow.ToString(format);
+        }
+
+        public static string? GetRealTime(string? format = "HH:mm", TimeZoneInfo? timeZone = null)
+        {
+            timeZone ??= TimeZoneInfo.Local;
+            var localNow = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
+            return localNow.ToString(format);
         }
     }
 }

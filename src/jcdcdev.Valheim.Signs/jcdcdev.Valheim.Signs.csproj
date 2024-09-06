@@ -72,4 +72,18 @@
         </PropertyGroup>
         <Error Condition="!Exists('..\packages\JotunnLib.2.20.3\build\JotunnLib.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JotunnLib.2.20.3\build\JotunnLib.props'))"/>
     </Target>
+    <Target Name="BeforeBuild">
+        <ItemGroup>
+            <AssemblyAttributes Include="AssemblyVersion;AssemblyFileVersion;AssemblyInformationalVersion">
+                <_Parameter1>$(Version)</_Parameter1>
+            </AssemblyAttributes>
+        </ItemGroup>
+        <MakeDir Directories="$(IntermediateOutputPath)" />
+        <WriteCodeFragment Language="C#"
+                           OutputFile="$(IntermediateOutputPath)Version.cs"
+                           AssemblyAttributes="@(AssemblyAttributes)" />
+        <ItemGroup>
+            <Compile Include="$(IntermediateOutputPath)Version.cs" />
+        </ItemGroup>
+    </Target>
 </Project>

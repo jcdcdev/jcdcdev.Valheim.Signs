@@ -4,7 +4,7 @@ namespace jcdcdev.Valheim.Signs.Converters
 {
     public class FuzzyTime : IAmADynamicSign
     {
-        public bool CanConvert(Sign sign, string originalText) => originalText.StartsWith("fuzzyTime", System.StringComparison.InvariantCultureIgnoreCase);
+        public bool CanConvert(Sign sign, string originalText) => originalText.StartsWithInvariant("fuzzyTime");
 
         public string? GetSignText(Sign sign, string originalText) => TimeExtensions.GetFuzzyTime();
 

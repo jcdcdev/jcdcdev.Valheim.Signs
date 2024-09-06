@@ -85,12 +85,13 @@ namespace jcdcdev.Valheim.Signs
                 }
 
                 output = RegexPattern.Replace(originalText, newValue, 1);
+                break;
             }
 
             return output != originalText;
         }
 
-        private string? GetTokenValue(string originalText)
+        private static string? GetTokenValue(string originalText)
         {
             var match = RegexPattern.Match(originalText);
             var originalValue = match.Groups[1].Value;
@@ -120,8 +121,8 @@ namespace jcdcdev.Valheim.Signs
                 }
 
                 var regex = new Regex("\"([^\"]*)\"");
-                hover = $"[<color=\"yellow\">DYNAMIC</color>] {hover}";
-                output = regex.Replace(originalText, $"\"{hover}\"");
+                hover = $"\"[<color=\"yellow\">DYNAMIC</color>] {hover}\"";
+                output = regex.Replace(originalText, $"{hover}");
             }
 
             return output != originalText;
