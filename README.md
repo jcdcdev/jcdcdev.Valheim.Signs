@@ -1,5 +1,7 @@
 ## jcdcdev.Valheim.Signs
 
+<img src="https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/icon.png" alt="jcdcdev.Valheim.Signs icon" height="150" align="right">
+
 ![GitHub Release](https://img.shields.io/github/v/release/jcdcdev/jcdcdev.Valheim.Signs?label&color=3c4834) [![Thunderstore Release](https://img.shields.io/badge/Install-Thunderstore-375a7f)](https://thunderstore.io/c/valheim/p/jcdcdev/Signs/) [![Nexus Mods Release](https://img.shields.io/badge/Install-Nexus%20Mods-b4762c)](https://www.nexusmods.com/valheim/mods/2881)
 
 This is a BepInEx plugin for Valheim that allows you to configure signs to display in-game information.
