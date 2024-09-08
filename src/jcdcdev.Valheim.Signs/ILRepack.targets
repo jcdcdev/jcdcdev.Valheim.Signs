@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="ILRepacker" AfterTargets="Build">
+        <ItemGroup>
+            <InputAssemblies Include="$(TargetPath)"/>
+            <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'ServerSync'"/>
+            <LibraryPath Include="%(ReferencePathWithRefAssemblies.RelativeDir)"/>
+        </ItemGroup>
+        <ILRepack
+                AllowDuplicateResources="false"
+                DebugInfo="false"
+                Internalize="true"
+                InputAssemblies="@(InputAssemblies)"
+                LibraryPath="@(LibraryPath)"
+                OutputFile="$(TargetPath)"
+                Parallel="true"
+                TargetKind="SameAsPrimaryAssembly"/>
+    </Target>
+</Project>
