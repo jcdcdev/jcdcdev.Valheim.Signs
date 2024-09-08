@@ -4,15 +4,26 @@ using System.Reflection;
 using HarmonyLib;
 using System.Text.RegularExpressions;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using jcdcdev.Valheim.Signs.Converters;
 using JetBrains.Annotations;
+using ServerSync;
 
 namespace jcdcdev.Valheim.Signs
 {
     [BepInPlugin(PluginId, Name, VersionInfo.Version)]
     public class SignsPlugin : BaseUnityPlugin
     {
+        private readonly ConfigSync _configSync = new ConfigSync(PluginId)
+        {
+            DisplayName = Name,
+            CurrentVersion = VersionInfo.Version,
+            MinimumRequiredVersion = VersionInfo.Version,
+            ModRequired = true,
+            IsLocked = true
+        };
+
         public SignsPlugin()
         {
             var types = Assembly.GetExecutingAssembly().GetTypes();
@@ -40,7 +51,7 @@ namespace jcdcdev.Valheim.Signs
 
         public static readonly ManualLogSource Log = new ManualLogSource(Name);
         private readonly IAmADynamicSign[] _dynamicSigns;
-        private const string Name = "jcdcdev - Dynamic Signs";
+        private const string Name = "jcdcdev - Signs";
         private const string PluginId = "jcdcdev.valheim.signs";
         public static SignsPlugin Instance => _instance ?? throw new InvalidOperationException("Plugin is not loaded");
         private static SignsPlugin? _instance;

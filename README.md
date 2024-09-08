@@ -4,6 +4,12 @@ This is a BepInEx plugin for Valheim that allows you to configure signs to displ
 
 Feel free to [suggest](https://github.com/jcdcdev/jcdcdev.Valheim.Signs/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml&title=[Sign%20Suggestion]%20) other useful signs!
 
+## Client or Server?
+
+This mod is designed to work on the client and optionally the server.
+
+_If_ added to the server, **all** clients will need to have the mod installed to join.
+
 ## Features
 
 Simply place any sign and set the text to one of the following options, e.g `{{onlineCount}}`.

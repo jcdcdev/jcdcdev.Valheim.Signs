@@ -13,7 +13,7 @@ namespace jcdcdev.Valheim.Signs.Patches
         public static void Postfix(Sign __instance)
         {
             var view = __instance.m_nview;
-            if (!view?.IsValid() ?? true)
+            if (view == null || !view.IsValid())
             {
                 return;
             }

@@ -40,6 +40,9 @@
             <HintPath>..\packages\JotunnLib.2.20.3\lib\net462\Jotunn.dll</HintPath>
         </Reference>
         <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="ServerSync">
+          <HintPath>..\lib\ServerSync.dll</HintPath>
+        </Reference>
         <Reference Include="System"/>
         <Reference Include="System.Core"/>
         <Reference Include="System.Data"/>
@@ -74,6 +77,7 @@
             <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
         </PropertyGroup>
         <Error Condition="!Exists('..\packages\JotunnLib.2.20.3\build\JotunnLib.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JotunnLib.2.20.3\build\JotunnLib.props'))"/>
+        <Error Condition="!Exists('..\packages\ILRepack.Lib.MSBuild.Task.2.0.34.2\build\ILRepack.Lib.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.Lib.MSBuild.Task.2.0.34.2\build\ILRepack.Lib.MSBuild.Task.targets'))" />
     </Target>
     <Target Name="BeforeBuild">
         <ItemGroup>
@@ -82,11 +86,10 @@
             </AssemblyAttributes>
         </ItemGroup>
         <MakeDir Directories="$(IntermediateOutputPath)" />
-        <WriteCodeFragment Language="C#"
-                           OutputFile="$(IntermediateOutputPath)Version.cs"
-                           AssemblyAttributes="@(AssemblyAttributes)" />
+        <WriteCodeFragment Language="C#" OutputFile="$(IntermediateOutputPath)Version.cs" AssemblyAttributes="@(AssemblyAttributes)" />
         <ItemGroup>
             <Compile Include="$(IntermediateOutputPath)Version.cs" />
         </ItemGroup>
     </Target>
+    <Import Project="..\packages\ILRepack.Lib.MSBuild.Task.2.0.34.2\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('..\packages\ILRepack.Lib.MSBuild.Task.2.0.34.2\build\ILRepack.Lib.MSBuild.Task.targets')" />
 </Project>
