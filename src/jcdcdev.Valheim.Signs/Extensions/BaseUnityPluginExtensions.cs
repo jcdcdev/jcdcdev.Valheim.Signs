@@ -91,12 +91,12 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
 
     private void SetupWatcher()
     {
-        if (!Directory.Exists(Paths.ConfigPath))
+        if (!Directory.Exists(ConfigBasePath))
         {
-            Directory.CreateDirectory(Paths.ConfigPath);
+            Directory.CreateDirectory(ConfigBasePath);
         }
 
-        var fileSystemWatcher = new FileSystemWatcher(Paths.ConfigPath, ConfigFileName);
+        var fileSystemWatcher = new FileSystemWatcher(ConfigBasePath, ConfigFileName);
         fileSystemWatcher.Changed += ReadConfigValues;
         fileSystemWatcher.Created += ReadConfigValues;
         fileSystemWatcher.Renamed += ReadConfigValues;
