@@ -6,13 +6,8 @@
 
 This is a BepInEx plugin for Valheim that allows you to configure signs to display in-game information.
 
-Feel free to [suggest](https://github.com/jcdcdev/jcdcdev.Valheim.Signs/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml&title=[Sign%20Suggestion]%20) other useful signs!
-
-## Client or Server?
-
-This mod is designed to work on the client and optionally the server.
-
-_If_ added to the server, **all** clients will need to have the mod installed to join.
+Feel free to [suggest](https://github.com/jcdcdev/jcdcdev.Valheim.Signs/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml&title=[Sign%20Suggestion]%20) other useful
+signs!
 
 ## Features
 
@@ -25,6 +20,18 @@ Displays the current number of players online.
 `{{onlineCount}}`
 
 ![In game screenshot of the Online Count sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/online-count.png)
+
+### Death Leaderboard
+
+Displays the players with the most deaths on this world.
+
+`{{deathBoard}}`
+
+![In game screenshot of the Death Leaderboard sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/deaths-leaderboard.png)
+
+| Option  | Description                                                   | Example            | Example Output           |
+|---------|---------------------------------------------------------------|--------------------|--------------------------|
+| `count` | The number of players to show<br/>Defaults to 3 if left blank | `{{deathBoard 2}}` | `JCDC: 34`<br/>`JIM: 14` |
 
 ### Comfort
 
@@ -60,10 +67,10 @@ Displays the current in-game time.
 
 #### Options
 
-| Option | Description                | Example           | Example Output            |
-|--------|----------------------------|-------------------|---------------------------|
-| `12`   | Outputs in 12 hour format  | `{{gameTime 12}}` | `12:00 AM`                |
-| `s`    | Adds seconds to the time   | `{{gameTime s}}`  | `12:00:00`                |
+| Option | Description               | Example           | Example Output |
+|--------|---------------------------|-------------------|----------------|
+| `12`   | Outputs in 12 hour format | `{{gameTime 12}}` | `12:00 AM`     |
+| `s`    | Adds seconds to the time  | `{{gameTime s}}`  | `12:00:00`     |
 
 ### Actual Time
 
@@ -75,22 +82,30 @@ Displays the current time.
 
 #### Options
 
-| Option | Description                | Example           | Example Output            |
-|--------|----------------------------|-------------------|---------------------------|
-| `12`   | Outputs in 12 hour format  | `{{gameTime 12}}` | `12:00 AM`                |
-| `s`    | Adds seconds to the time   | `{{gameTime s}}`  | `12:00:00`                |
-| `f`    | Outputs full date and time | `{{gameTime f}}`  | `06 September 2024 09:08` |
-| `g`    | Outputs date and time      | `{{gameTime g}}`  | `06/09/2024 09:08`        |
+| Option | Description                | Example             | Example Output            |
+|--------|----------------------------|---------------------|---------------------------|
+| `12`   | Outputs in 12 hour format  | `{{actualTime 12}}` | `12:00 AM`                |
+| `s`    | Adds seconds to the time   | `{{actualTime s}}`  | `12:00:00`                |
+| `f`    | Outputs full date and time | `{{actualTime f}}`  | `06 September 2024 09:08` |
+| `g`    | Outputs date and time      | `{{actualTime g}}`  | `06/09/2024 09:08`        |
 
-### Installation
+## Installation
+
+This mod **must** be installed on the server and all clients to work.
+Players will not be able to join the server/your game if they do not have the mod installed.
 
 _If you're using a mod installer, you can likely ignore this section._
 
+### Installation
+
 #### Install BepInEx
 
-Download [BepInEx](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/), extract everything inside `BepInEx_Valheim` into your Valheim folder (
-typically `C:\<PathToYourSteamLibrary>\steamapps\common\Valheim`).
+- Download [BepInEx](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/),
+- Extract everything inside `BepInEx_Valheim` into your Valheim folder
+    - e.g `C:/<PathToYourSteamLibrary>/steamapps/common/Valheim`
 
 #### Install jcdcdev.Valheim.Signs
 
-Download from Thunderstore, extract the ZIP and place all content into `BepInEx/plugins` of your Valheim install.
+- Download the mod
+- Extract the ZIP
+- Place the `jcdcdev.Valheim.Signs` folder into `BepInEx/plugins` of your Valheim folder.

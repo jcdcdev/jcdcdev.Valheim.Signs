@@ -4,16 +4,17 @@
         <ItemGroup>
             <InputAssemblies Include="$(TargetPath)"/>
             <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'ServerSync'"/>
+            <InputAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'Newtonsoft.Json'"/>
             <LibraryPath Include="%(ReferencePathWithRefAssemblies.RelativeDir)"/>
         </ItemGroup>
         <ILRepack
-                AllowDuplicateResources="false"
-                DebugInfo="false"
-                Internalize="true"
-                InputAssemblies="@(InputAssemblies)"
-                LibraryPath="@(LibraryPath)"
-                OutputFile="$(TargetPath)"
-                Parallel="true"
-                TargetKind="SameAsPrimaryAssembly"/>
+            AllowDuplicateResources="false"
+            DebugInfo="false"
+            Internalize="true"
+            InputAssemblies="@(InputAssemblies)"
+            LibraryPath="@(LibraryPath)"
+            OutputFile="$(TargetPath)"
+            Parallel="true"
+            TargetKind="SameAsPrimaryAssembly"/>
     </Target>
 </Project>

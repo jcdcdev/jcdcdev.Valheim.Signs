@@ -1,7 +1,6 @@
-﻿namespace jcdcdev.Valheim.Signs
+﻿namespace jcdcdev.Valheim.Signs;
+
+public static class VersionInfo
 {
-    public static class VersionInfo
-    {
-        public const string Version = "1.0.0";
-    }
+    public const string Version = "1.0.0";
 }

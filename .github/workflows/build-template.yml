@@ -12,10 +12,10 @@ on:
         description: 'The version of BepInEx to use'
         required: true
     outputs:
-      asset-name: 
+      asset-name:
         description: 'The name of the asset uploaded'
         value: ${{ jobs.build.outputs.asset-name }}
-      mod-version: 
+      mod-version:
         description: 'The version of the mod'
         value: ${{ jobs.determine-version.outputs.mod-version }}
       valheim-version:
@@ -70,6 +70,7 @@ jobs:
       PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
       BUILD_OUTPUT: ${{ github.workspace }}/build-output/
       MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
+      ARTIFACT_PATH: ${{ github.workspace }}/mod/
       SOLUTION_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.sln
       VALHEIM_INSTALL: ${{ github.workspace }}\valheim
       VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
@@ -100,16 +101,16 @@ jobs:
         if: steps.cachevalheim.outputs.cache-hit != 'true'
         run: |
           Write-Host "Installing BepInEx"
-          
+
           mkdir bepinex
-          Push-Location bepinex 
-          
+          Push-Location bepinex
+
           Invoke-WebRequest -Uri ${{ env.BEPINEX_URL }} -OutFile bepinex.zip
           Expand-Archive -Path bepinex.zip -DestinationPath "./"
           mv BepInExPack_Valheim/* ${{ env.VALHEIM_INSTALL }}
-          
+
           Pop-Location
-          Remove-Item bepinex -Recurse   
+          Remove-Item bepinex -Recurse
 
       - name: Prepare Valheim
         if: steps.cachevalheim.outputs.cache-hit != 'true'
@@ -138,16 +139,24 @@ jobs:
         run: |
           $content = Get-Content ${{ env.VERSION_INFO_FILE }}
           $updatedContent = $content -replace "1.0.0", "${{ env.MOD_VERSION }}"
-          Set-Content ${{ env.VERSION_INFO_FILE }} -Value $updatedContent    
+          Set-Content ${{ env.VERSION_INFO_FILE }} -Value $updatedContent
 
       - name: Build Solution
         run: |
           Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
           msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
-
+      - name: Copy mod files to output
+        run: |
+            Write-Host "Copying mod files to output"
+            $file = "${{ env.MOD_OUTPUT }}"
+            $outputPath = "${{ env.ARTIFACT_PATH }}/${{ inputs.project-name }}"
+            if (-not (Test-Path $outputPath)) {
+              New-Item -ItemType Directory -Path $outputPath -Force
+            }
+            Copy-Item $file $outputPath
       - name: Upload mod
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ASSET_NAME }}
-          path: ${{ env.MOD_OUTPUT }}
+          path: ${{ env.ARTIFACT_PATH }}
           if-no-files-found: error
