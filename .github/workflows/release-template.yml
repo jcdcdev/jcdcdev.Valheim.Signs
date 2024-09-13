@@ -94,7 +94,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LATEST_CHANGELOG: | 
+          LATEST_CHANGELOG: |
             ## ${{ env.MOD_VERSION }}
 
             ${{ steps.changelog.outputs.changelog }}
@@ -106,13 +106,13 @@ jobs:
             Write-Host "Changelog already exists"
             exit 0
           }
-          
+
           New-Item -Path $changelog_file -ItemType File -Force
 
-          $jq = "sort_by(.tag_name) | reverse | .[]" 
+          $jq = "sort_by(.tag_name) | reverse | .[]"
           $releases = gh api "repos/${{ env.REPO }}/releases" --jq "$jq" | ConvertFrom-Json
-          
-          $changelog="# Changelog`n${{ env.LATEST_CHANGELOG }}"          
+
+          $changelog="# Changelog`n${{ env.LATEST_CHANGELOG }}"
           $releases | ForEach-Object {
             $release = $_
             if ($release.tag_name -eq ${{ env.MOD_VERSION }}) {
@@ -124,7 +124,7 @@ jobs:
             write-host "$releaseBody"
             $changelog += "`n$releaseBody"
           }
-    
+
           $changelog = $changelog -replace '\n', "`n"
           Set-Content -Path $changelog_file -Value $changelog -NoNewline
           Write-Host "FINAL CHANGELOG:`n`n$changelog`n`n"
@@ -135,7 +135,7 @@ jobs:
           $files | ForEach-Object {
               $file = $_
               $path = "${{ env.MOD_PATH }}/$file"
-              if (Test-Path $file) {              
+              if (Test-Path $file) {
                 if (-not (Test-Path $path)) {
                   Write-Host "Copying $file to $path"
                   Copy-Item $file $path
@@ -147,19 +147,19 @@ jobs:
         run: |
           $path = "${{ env.MOD_PATH }}"
           $files = Get-ChildItem -Path $path -Recurse
-          Write-Host "Files to package:`n`n$files"       
+          Write-Host "Files to package:`n`n$files"
           $dlls = $files | Where-Object { $_.Extension -eq '.dll' }
           if ($dlls.Count -eq 0) {
             Write-Error "No dlls found in $path"
             exit 1
           }
-          
+
           $zipPath = "${{ env.MOD_ZIP_PATH }}"
           $zipDir = Split-Path $zipPath
           if (-not (Test-Path $zipDir)) {
             New-Item -ItemType Directory -Path $zipDir -Force
           }
-          
+
           Push-Location $path
           Compress-Archive -Path .\* -DestinationPath $zipPath -Force
           Pop-Location

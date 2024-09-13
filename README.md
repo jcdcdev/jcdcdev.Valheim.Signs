@@ -21,6 +21,18 @@ Displays the current number of players online.
 
 ![In game screenshot of the Online Count sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/online-count.png)
 
+### Death Count
+
+Displays the current player's number of deaths on this world.
+
+`{{deathCount}}`
+
+![In game screenshot of the Death Count sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/deaths-count.png)
+
+| Option     | Description                                                               | Example               | Example Output |
+|------------|---------------------------------------------------------------------------|-----------------------|----------------|
+| `playerId` | The player's name or ID.<br/>Defaults to the current player if left blank | `{{deathCount jcdc}}` | `3`            |
+
 ### Death Leaderboard
 
 Displays the players with the most deaths on this world.
@@ -29,9 +41,9 @@ Displays the players with the most deaths on this world.
 
 ![In game screenshot of the Death Leaderboard sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/deaths-leaderboard.png)
 
-| Option  | Description                                                   | Example            | Example Output           |
-|---------|---------------------------------------------------------------|--------------------|--------------------------|
-| `count` | The number of players to show<br/>Defaults to 3 if left blank | `{{deathBoard 2}}` | `JCDC: 34`<br/>`JIM: 14` |
+| Option  | Description                                                   | Example            | Example Output              |
+|---------|---------------------------------------------------------------|--------------------|-----------------------------|
+| `count` | The number of players to show<br/>Defaults to 3 if left blank | `{{deathBoard 2}}` | `1. JIM: 3`<br/>`2. MIJ: 1` |
 
 ### Comfort
 
