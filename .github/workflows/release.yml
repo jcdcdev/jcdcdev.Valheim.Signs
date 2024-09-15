@@ -7,7 +7,7 @@ on:
     branches:
       - main
     types: [ closed ]
-      
+
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,6 @@ jobs:
     uses: ./.github/workflows/build-template.yml
     with:
       project-name: jcdcdev.Valheim.Signs
-      bepinex-version: 5.4.2202
   release:
     uses: ./.github/workflows/release-template.yml
     needs:
@@ -32,6 +31,7 @@ jobs:
         mods
         client-side
         tweaks
+        server-side
       project-version: ${{ needs.build.outputs.mod-version }}
       asset-name: ${{ needs.build.outputs.asset-name }}
       project-dependencies: ${{ needs.build.outputs.mod-dependencies }}

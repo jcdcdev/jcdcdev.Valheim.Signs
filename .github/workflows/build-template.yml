@@ -1,162 +1,209 @@
 ﻿name: '[Template] Build'
 
 on:
-  workflow_call:
-    inputs:
-      project-name:
-        type: string
-        description: 'The name of the project (e.g jcdcdev.Valheim.Signs)'
-        required: true
-      bepinex-version:
-        type: string
-        description: 'The version of BepInEx to use'
-        required: true
-    outputs:
-      asset-name:
-        description: 'The name of the asset uploaded'
-        value: ${{ jobs.build.outputs.asset-name }}
-      mod-version:
-        description: 'The version of the mod'
-        value: ${{ jobs.determine-version.outputs.mod-version }}
-      valheim-version:
-        description: 'The version of Valheim'
-        value: ${{ jobs.determine-version.outputs.valheim-version }}
-      mod-dependencies:
-        description: 'The dependencies of the mod'
-        value: ${{ jobs.determine-version.outputs.mod-dependencies }}
+    workflow_call:
+        inputs:
+            project-name:
+                type: string
+                description: 'The name of the project (e.g jcdcdev.Valheim.Signs)'
+                required: true
+        outputs:
+            asset-name:
+                description: 'The name of the asset uploaded'
+                value: ${{ jobs.build.outputs.asset-name }}
+            mod-version:
+                description: 'The version of the mod'
+                value: ${{ jobs.determine-version.outputs.mod-version }}
+            valheim-version:
+                description: 'The version of Valheim'
+                value: ${{ jobs.determine-version.outputs.valheim-version }}
+            mod-dependencies:
+                description: 'The dependencies of the mod'
+                value: ${{ jobs.determine-version.outputs.mod-dependencies }}
+            bepinex-version:
+                description: 'The version of BepInEx'
+                value: ${{ jobs.determine-version.outputs.bepinex-version }}
+            jotunn-version:
+                description: 'The version of Jotunn'
+                value: ${{ jobs.determine-version.outputs.jotunn-version }}
+
 env:
-  BEPINEX_MOD_NAME: denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}
-  BEPINEX_URL: https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-${{ inputs.bepinex-version }}.zip
+    PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
+    BUILD_OUTPUT: ${{ github.workspace }}/build-output/
+    MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
+    ARTIFACT_PATH: ${{ github.workspace }}/mod/
+    SOLUTION_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.sln
+    VALHEIM_INSTALL: ${{ github.workspace }}\valheim
+    VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
+    PACKAGES_CONFIG: ${{ github.workspace }}/src/${{ inputs.project-name }}/packages.config
 jobs:
-  determine-version:
-    name: determine version
-    runs-on: ubuntu-latest
-    outputs:
-      mod-version: ${{ steps.gitversion.outputs.semVer }}
-      valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
-      mod-dependencies: ${{ steps.valheim-version.outputs.mod-dependencies }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
-        with:
-          versionSpec: '5.x'
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0
-      - name: Get Valheim version id
-        id: valheim-version
-        run: |
-          DATA=$(curl -s "https://api.steamcmd.net/v1/info/896660")
-          echo $DATA
-          VALHEIM_VERSION=$(echo $DATA | jq -r ".data.\"896660\".depots.branches.public.buildid")
-          echo $VALHEIM_VERSION
-          if [ "$VALHEIM_VERSION" == "null" ]; then
-              echo "Valheim version not found"
-              exit 1
-          fi
-          echo "valheim-version=$VALHEIM_VERSION" >> $GITHUB_OUTPUT
-          echo "mod-dependencies=${{ env.BEPINEX_MOD_NAME }}" >> $GITHUB_OUTPUT
-  build:
-    name: build ${{ needs.determine-version.outputs.mod-version }}
-    runs-on: windows-latest
-    needs:
-      - determine-version
-    env:
-      MOD_VERSION: ${{ needs.determine-version.outputs.mod-version }}
-      ASSET_NAME: "${{ inputs.project-name }}-${{ needs.determine-version.outputs.mod-version }}"
-      PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
-      BUILD_OUTPUT: ${{ github.workspace }}/build-output/
-      MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
-      ARTIFACT_PATH: ${{ github.workspace }}/mod/
-      SOLUTION_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.sln
-      VALHEIM_INSTALL: ${{ github.workspace }}\valheim
-      VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
-      VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
-    outputs:
-      asset-name: ${{ env.ASSET_NAME }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    determine-version:
+        name: determine version
+        runs-on: ubuntu-latest
+        outputs:
+            mod-version: ${{ steps.gitversion.outputs.semVer }}
+            valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
+            mod-dependencies: ${{ steps.valheim-version.outputs.mod-dependencies }}
+            bepinex-version: ${{ steps.jotunn-version.outputs.bepinex-version }}
+            bepinex-url: ${{ steps.jotunn-version.outputs.bepinex-url }}
+            jotunn-version: ${{ steps.jotunn-version.outputs.jotunn-version }}
+        steps:
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+            -   name: Install GitVersion
+                uses: gittools/actions/gitversion/setup@v0
+                with:
+                    versionSpec: '5.x'
+            -   name: Determine Version
+                id: gitversion
+                uses: gittools/actions/gitversion/execute@v0
+            -   name: Get Valheim version id
+                id: valheim-version
+                run: |
+                    DATA=$(curl -s "https://api.steamcmd.net/v1/info/896660")
+                    echo $DATA
+                    VALHEIM_VERSION=$(echo $DATA | jq -r ".data.\"896660\".depots.branches.public.buildid")
+                    echo $VALHEIM_VERSION
+                    if [ "$VALHEIM_VERSION" == "null" ]; then
+                        echo "Valheim version not found"
+                        exit 1
+                    fi
+                    echo "valheim-version=$VALHEIM_VERSION" >> $GITHUB_OUTPUT
+            -   name: Get Jotunn version id
+                id: jotunn-version
+                run: |
+                    # Get Jotunn version from packages.config
+                    JOTUNN_PACKAGE_VERSION=$(grep -oP 'JotunnLib" version="\K[^"]+' ${{ env.PACKAGES_CONFIG }})
+                    echo "Jotunn Package Version: $JOTUNN_PACKAGE_VERSION"
+                    if [ -z "$JOTUNN_PACKAGE_VERSION" ]; then
+                        echo "Jotunn package version not found"
+                        exit 1
+                    fi
 
-      - name: Cache Valheim
-        id: cachevalheim
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.VALHEIM_INSTALL }}
-          key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL }}
+                    JOTUNN_URL="https://thunderstore.io/api/experimental/package/ValheimModding/Jotunn/$JOTUNN_PACKAGE_VERSION/"
+                    echo "Jotunn URL: $JOTUNN_URL"
 
-      - name: Install SteamCMD
-        if: steps.cachevalheim.outputs.cache-hit != 'true'
-        uses: CyberAndrii/setup-steamcmd@v1
+                    DATA=$(curl -s "$JOTUNN_URL")
 
-      - name: Install Valheim
-        if: steps.cachevalheim.outputs.cache-hit != 'true'
-        run: |
-          steamcmd +force_install_dir ${{ env.VALHEIM_INSTALL }} +login anonymous +app_update 896660 validate +exit
+                    echo "DATA:\n$DATA"
 
-      - name: Install BepInEx
-        if: steps.cachevalheim.outputs.cache-hit != 'true'
-        run: |
-          Write-Host "Installing BepInEx"
+                    JOTUNN_DEPENDENCY=$(echo $DATA | jq -r ".full_name")
+                    BEPINEX_DEPENDENCY=$(echo $DATA | jq -r ".dependencies[0]")
+                    BEPINEX_VERSION=$(echo $BEPINEX_DEPENDENCY | cut -d'-' -f 3)
+                    BEPINEX_URL="https://gcdn.thunderstore.io/live/repository/packages/$BEPINEX_DEPENDENCY.zip"
+                    MOD_DEPENDENCIES="$BEPINEX_DEPENDENCY\n$JOTUNN_DEPENDENCY"
 
-          mkdir bepinex
-          Push-Location bepinex
+                    echo "Jotunn Dependency: $JOTUNN_DEPENDENCY"
+                    echo "Jotunn Version: $JOTUNN_PACKAGE_VERSION"
+                    echo "BepInEx Dependency: $BEPINEX_DEPENDENCY"
+                    echo "BepInEx Version: $BEPINEX_VERSION"
+                    echo "BepInEx URL: $BEPINEX_URL"
+                    echo "Mod Dependencies: $MOD_DEPENDENCIES"
 
-          Invoke-WebRequest -Uri ${{ env.BEPINEX_URL }} -OutFile bepinex.zip
-          Expand-Archive -Path bepinex.zip -DestinationPath "./"
-          mv BepInExPack_Valheim/* ${{ env.VALHEIM_INSTALL }}
+                    echo "bepinex-version=$BEPINEX_VERSION" >> $GITHUB_OUTPUT
+                    echo "bepinex-url=$BEPINEX_URL" >> $GITHUB_OUTPUT
+                    echo "jotunn-version=$JOTUNN_PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
-          Pop-Location
-          Remove-Item bepinex -Recurse
+                    {
+                      echo 'mod-dependencies<<EOF'
+                      echo "${MOD_DEPENDENCIES}"
+                      echo EOF
+                    } >> "$GITHUB_OUTPUT"
+    build:
+        name: build ${{ needs.determine-version.outputs.mod-version }}
+        runs-on: windows-latest
+        needs:
+            - determine-version
+        env:
+            MOD_VERSION: ${{ needs.determine-version.outputs.mod-version }}
+            ASSET_NAME: "${{ inputs.project-name }}-${{ needs.determine-version.outputs.mod-version }}"
+            VALHEIM_VERSION: ${{ needs.determine-version.outputs.valheim-version }}
+            BEPINEX_URL: ${{ needs.determine-version.outputs.bepinex-url }}
+            BEPINEX_VERSION: ${{ needs.determine-version.outputs.bepinex-version }}
+            JOTUNN_VERSION: ${{ needs.determine-version.outputs.jotunn-version }}
+        outputs:
+            asset-name: ${{ env.ASSET_NAME }}
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v4
 
-      - name: Prepare Valheim
-        if: steps.cachevalheim.outputs.cache-hit != 'true'
-        run: |
-          mv ${{ env.VALHEIM_INSTALL }}/valheim_server_Data/ ${{ env.VALHEIM_INSTALL }}/valheim_Data/
-          $path = "${{ env.VALHEIM_INSTALL }}/valheim_server_Data/Managed/publicized_assemblies"
-          if (Test-Path "$path") {
-            Write-Host "Removing publicized assemblies"
-            Remove-Item "$path" -r
-          }
+            -   name: Cache Valheim
+                id: cachevalheim
+                uses: actions/cache@v3
+                with:
+                    path: ${{ env.VALHEIM_INSTALL }}
+                    key: ${{ env.VALHEIM_VERSION }}-${{ env.BEPINEX_URL }}
 
-          $FILES = Get-ChildItem -Path ${{ env.VALHEIM_INSTALL }} -Recurse
-          Write-Host "Valheim files:`n`n$FILES"
+            -   name: Install SteamCMD
+                if: steps.cachevalheim.outputs.cache-hit != 'true'
+                uses: CyberAndrii/setup-steamcmd@v1
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+            -   name: Install Valheim
+                if: steps.cachevalheim.outputs.cache-hit != 'true'
+                run: |
+                    steamcmd +force_install_dir ${{ env.VALHEIM_INSTALL }} +login anonymous +app_update 896660 validate +exit
 
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v2
+            -   name: Install BepInEx
+                if: steps.cachevalheim.outputs.cache-hit != 'true'
+                run: |
+                    Write-Host "Installing BepInEx"
 
-      - name: Restore Packages
-        run: |
-          nuget restore ${{ env.SOLUTION_PATH }}
+                    mkdir bepinex
+                    Push-Location bepinex
 
-      - name: Set version file
-        run: |
-          $content = Get-Content ${{ env.VERSION_INFO_FILE }}
-          $updatedContent = $content -replace "1.0.0", "${{ env.MOD_VERSION }}"
-          Set-Content ${{ env.VERSION_INFO_FILE }} -Value $updatedContent
+                    Invoke-WebRequest -Uri ${{ env.BEPINEX_URL }} -OutFile bepinex.zip
+                    Expand-Archive -Path bepinex.zip -DestinationPath "./"
+                    mv BepInExPack_Valheim/* ${{ env.VALHEIM_INSTALL }}
 
-      - name: Build Solution
-        run: |
-          Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
-          msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
-      - name: Copy mod files to output
-        run: |
-            Write-Host "Copying mod files to output"
-            $file = "${{ env.MOD_OUTPUT }}"
-            $outputPath = "${{ env.ARTIFACT_PATH }}/${{ inputs.project-name }}"
-            if (-not (Test-Path $outputPath)) {
-              New-Item -ItemType Directory -Path $outputPath -Force
-            }
-            Copy-Item $file $outputPath
-      - name: Upload mod
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.ASSET_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-          if-no-files-found: error
+                    Pop-Location
+                    Remove-Item bepinex -Recurse
+
+            -   name: Prepare Valheim
+                if: steps.cachevalheim.outputs.cache-hit != 'true'
+                run: |
+                    mv ${{ env.VALHEIM_INSTALL }}/valheim_server_Data/ ${{ env.VALHEIM_INSTALL }}/valheim_Data/
+                    $path = "${{ env.VALHEIM_INSTALL }}/valheim_server_Data/Managed/publicized_assemblies"
+                    if (Test-Path "$path") {
+                      Write-Host "Removing publicized assemblies"
+                      Remove-Item "$path" -r
+                    }
+
+                    $FILES = Get-ChildItem -Path ${{ env.VALHEIM_INSTALL }} -Recurse
+                    Write-Host "Valheim files:`n`n$FILES"
+
+            -   name: Setup MSBuild
+                uses: microsoft/setup-msbuild@v2
+
+            -   name: Setup NuGet
+                uses: nuget/setup-nuget@v2
+
+            -   name: Restore Packages
+                run: |
+                    nuget restore ${{ env.SOLUTION_PATH }}
+
+            -   name: Set version file
+                run: |
+                    $content = Get-Content ${{ env.VERSION_INFO_FILE }}
+                    $updatedContent = $content -replace "1.0.0", "${{ env.MOD_VERSION }}"
+                    Set-Content ${{ env.VERSION_INFO_FILE }} -Value $updatedContent
+
+            -   name: Build Solution
+                run: |
+                    Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
+                    msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
+            -   name: Copy mod files to output
+                run: |
+                    Write-Host "Copying mod files to output"
+                    $file = "${{ env.MOD_OUTPUT }}"
+                    $outputPath = "${{ env.ARTIFACT_PATH }}/${{ inputs.project-name }}"
+                    if (-not (Test-Path $outputPath)) {
+                      New-Item -ItemType Directory -Path $outputPath -Force
+                    }
+                    Copy-Item $file $outputPath
+            -   name: Upload mod
+                uses: actions/upload-artifact@v4
+                with:
+                    name: ${{ env.ASSET_NAME }}
+                    path: ${{ env.ARTIFACT_PATH }}
+                    if-no-files-found: error

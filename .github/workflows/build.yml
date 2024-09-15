@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
       - "*"
-      
+
   workflow_dispatch:
 
 jobs:
@@ -14,4 +14,3 @@ jobs:
     uses: ./.github/workflows/build-template.yml
     with:
       project-name: jcdcdev.Valheim.Signs
-      bepinex-version: 5.4.2202
