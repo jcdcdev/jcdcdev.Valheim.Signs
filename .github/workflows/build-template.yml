@@ -43,7 +43,7 @@ jobs:
         outputs:
             mod-version: ${{ steps.gitversion.outputs.semVer }}
             valheim-version: ${{ steps.valheim-version.outputs.valheim-version }}
-            mod-dependencies: ${{ steps.valheim-version.outputs.mod-dependencies }}
+            mod-dependencies: ${{ steps.jotunn-version.outputs.mod-dependencies }}
             bepinex-version: ${{ steps.jotunn-version.outputs.bepinex-version }}
             bepinex-url: ${{ steps.jotunn-version.outputs.bepinex-url }}
             jotunn-version: ${{ steps.jotunn-version.outputs.jotunn-version }}
