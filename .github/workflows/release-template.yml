@@ -43,6 +43,11 @@ on:
         type: string
         description: 'The game of the Nexus Mod'
         required: true
+      dry-run:
+        type: boolean
+        description: 'Dry run the release'
+        default: false
+        required: false
 
 env:
   PROJECT_NAMESPACE: ${{ inputs.project-namespace }}
@@ -62,6 +67,7 @@ env:
   NEXUS_MOD_GAME: ${{ inputs.nexus-mod-game }}
   MOD_ZIP_PATH: "${{ github.workspace }}/mod_zip/${{ inputs.project-name }}-${{ inputs.project-version }}.zip"
   FILE_NAME: "${{ inputs.project-name }}-${{ inputs.project-version }}"
+  DRY_RUN: ${{ inputs.dry-run }}
 jobs:
   create-release:
     name: create release ${{ inputs.project-name }} - ${{ inputs.project-version }}
@@ -75,6 +81,7 @@ jobs:
           fetch-depth: 0
       - name: Create tag
         shell: bash
+        if: ${{ env.DRY_RUN == false }}
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
@@ -168,7 +175,8 @@ jobs:
         with:
           name: ${{ env.ASSET_NAME }}-mod.zip
           path: ${{ env.MOD_ZIP_PATH }}
-      - name: Fail early
+      - name: Return if dry run
+        if: ${{ env.DRY_RUN == true }}
         run: exit 1
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1

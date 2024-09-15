@@ -9,6 +9,12 @@ on:
     types: [ closed ]
 
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run the release'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
