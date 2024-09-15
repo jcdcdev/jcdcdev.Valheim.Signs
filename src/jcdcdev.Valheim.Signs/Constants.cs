@@ -12,4 +12,8 @@ public static class Constants
     {
         public static string DeathLeaderboard => "DeathLeaderboard";
     }
+
+    public const string DefaultHoverError = "Invalid sign";
+
+    public static string ErrorMessage(string error) => $"<color=\"red\">ERROR</color>\n{error}";
 }

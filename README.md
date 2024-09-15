@@ -67,7 +67,38 @@ Displays the current health level of the player.
 
 `{{health}}`
 
-![In game screenshot of the Comfort sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/health.png)
+![In game screenshot of the Health sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/health.png)
+
+## Skills
+
+Displays the skill level of the player.
+
+`{{skill bows}}`
+
+![In game screenshot of the Skills sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/skill.png)
+
+#### Skills
+
+- Axes
+- Blocking
+- BloodMagic
+- Bows
+- Clubs
+- Crossbows
+- ElementalMagic
+- Fishing
+- Jump
+- Knives
+- Pickaxes
+- Polearms
+- Ride
+- Run
+- Sneak
+- Spears
+- Swim
+- Swords
+- Unarmed
+- WoodCutting
 
 ### Game Time
 
