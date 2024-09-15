@@ -92,7 +92,7 @@ jobs:
                     BEPINEX_DEPENDENCY=$(echo $DATA | jq -r ".dependencies[0]")
                     BEPINEX_VERSION=$(echo $BEPINEX_DEPENDENCY | cut -d'-' -f 3)
                     BEPINEX_URL="https://gcdn.thunderstore.io/live/repository/packages/$BEPINEX_DEPENDENCY.zip"
-                    MOD_DEPENDENCIES="$BEPINEX_DEPENDENCY\n$JOTUNN_DEPENDENCY"
+                    MOD_DEPENDENCIES="$BEPINEX_DEPENDENCY $JOTUNN_DEPENDENCY"
 
                     echo "Jotunn Dependency: $JOTUNN_DEPENDENCY"
                     echo "Jotunn Version: $JOTUNN_PACKAGE_VERSION"
