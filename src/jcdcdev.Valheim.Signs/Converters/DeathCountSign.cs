@@ -15,8 +15,6 @@ public class DeathCountSign : IAmADynamicSign
     public string? GetSignText(Sign sign, string input)
     {
         var playerId = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).FirstOrDefault();
-        Logger.LogError($"PlayerId: {playerId}");
-
         if (playerId == null || playerId.IsNullOrWhiteSpace())
         {
             return Player.m_localPlayer?.GetDeathCount().ToString();
@@ -25,7 +23,7 @@ public class DeathCountSign : IAmADynamicSign
         var leaderboard = SignsPlugin.Instance.Client_GetOrRequestDeathLeaderboard();
         if (leaderboard == null)
         {
-            return "LEADERBOARD NOT FOUND";
+            return Constants.ErrorMessage("Leaderboard not available");
         }
 
         PlayerDeathInfo? player;
@@ -38,7 +36,7 @@ public class DeathCountSign : IAmADynamicSign
             player = leaderboard.Players.FirstOrDefault(x => x.Name.InvariantEquals(playerId));
         }
 
-        return player == null ? "PLAYER NOT FOUND" : $"{player.Deaths}";
+        return player == null ? Constants.ErrorMessage("Player not found") : player.Deaths.ToString();
     }
 
     public string? GetSignHoverText(Sign sign, string input) => "Deaths Count";
