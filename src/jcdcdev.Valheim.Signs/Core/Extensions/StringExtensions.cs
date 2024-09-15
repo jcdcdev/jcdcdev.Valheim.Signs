@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace jcdcdev.Valheim.Signs.Extensions;
+namespace jcdcdev.Valheim.Core.Extensions;
 
 public static class StringExtensions
 {

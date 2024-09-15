@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using BepInEx;
+using jcdcdev.Valheim.Core.Extensions;
 using jcdcdev.Valheim.Signs.Extensions;
 using jcdcdev.Valheim.Signs.Models;
+using Jotunn;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
@@ -13,7 +15,7 @@ public class DeathCountSign : IAmADynamicSign
     public string? GetSignText(Sign sign, string input)
     {
         var playerId = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).FirstOrDefault();
-        SignsPlugin.Instance.Logger.LogDebug($"PlayerId: {playerId}");
+        Logger.LogError($"PlayerId: {playerId}");
 
         if (playerId == null || playerId.IsNullOrWhiteSpace())
         {

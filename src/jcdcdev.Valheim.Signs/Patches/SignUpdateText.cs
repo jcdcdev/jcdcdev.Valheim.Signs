@@ -1,6 +1,7 @@
 ﻿using System;
 using BepInEx;
 using HarmonyLib;
+using Jotunn;
 
 // ReSharper disable InconsistentNaming
 
@@ -12,11 +13,11 @@ public static class SignUpdateText
 {
     public static void Postfix(Sign __instance)
     {
-        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix");
+        Logger.LogDebug("SignUpdateText.Postfix");
         var view = __instance.m_nview;
         if (view == null || !view.IsValid())
         {
-            SignsPlugin.Instance.Logger.LogWarning("SignUpdateText.Postfix: view is null or invalid");
+            Logger.LogWarning("SignUpdateText.Postfix: view is null or invalid");
             return;
         }
 
@@ -27,7 +28,7 @@ public static class SignUpdateText
             var text = GetSignText(__instance, zdo);
             if (!SignsPlugin.Instance.Client_GetSignText(__instance, text, out var output))
             {
-                SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: No output");
+                Logger.LogDebug("SignUpdateText.Postfix: No output");
                 return;
             }
 
@@ -35,7 +36,7 @@ public static class SignUpdateText
         }
         catch (Exception ex)
         {
-            SignsPlugin.Instance.Logger.LogError(ex);
+            Logger.LogError(ex);
         }
     }
 
@@ -64,10 +65,10 @@ public static class SignUpdateText
             output = text.IsNullOrWhiteSpace() ? defaultText : text;
         }
 
-        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: NEW TEXT: " + newText);
-        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: TEXT: " + text);
-        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: DEFAULT: " + defaultText);
-        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: RESULT OUTPUT: " + output);
+        Logger.LogDebug("SignUpdateText.Postfix: NEW TEXT: " + newText);
+        Logger.LogDebug("SignUpdateText.Postfix: TEXT: " + text);
+        Logger.LogDebug("SignUpdateText.Postfix: DEFAULT: " + defaultText);
+        Logger.LogDebug("SignUpdateText.Postfix: RESULT OUTPUT: " + output);
         return output;
     }
 }

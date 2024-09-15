@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace jcdcdev.Valheim.Signs.Extensions;
+namespace jcdcdev.Valheim.Core.Extensions;
 
 public static class TimeExtensions
 {

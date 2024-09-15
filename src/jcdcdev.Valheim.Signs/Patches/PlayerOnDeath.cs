@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using jcdcdev.Valheim.Signs.Extensions;
+using Jotunn;
 
 // ReSharper disable InconsistentNaming
 namespace jcdcdev.Valheim.Signs.Patches;
@@ -9,8 +10,8 @@ public static class PlayerOnDeath
 {
     public static void Postfix(Player __instance)
     {
-        SignsPlugin.Instance.Logger.LogDebug("PlayerOnDeath.Postfix");
+        Logger.LogDebug("PlayerOnDeath.Postfix");
         __instance.IncrementDeathCount();
-        RPC.Client.InvokeDeathUpdateRequest(__instance);
+        SignsPlugin.Instance.Client_SendDeathUpdateRequest(__instance);
     }
 }

@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace jcdcdev.Valheim.Signs.Extensions;
+﻿namespace jcdcdev.Valheim.Core;
 
 public static class JsonHelper
 {
@@ -11,7 +9,7 @@ public static class JsonHelper
             return null;
         }
 
-        return JsonConvert.SerializeObject(obj);
+        return SimpleJson.SimpleJson.SerializeObject(obj);
     }
 
     public static T? FromJson<T>(string? json) where T : class
@@ -21,6 +19,6 @@ public static class JsonHelper
             return null;
         }
 
-        return JsonConvert.DeserializeObject<T>(json);
+        return SimpleJson.SimpleJson.DeserializeObject<T>(json);
     }
 }

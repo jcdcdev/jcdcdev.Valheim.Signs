@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Jotunn;
 
 // ReSharper disable once InconsistentNaming
 namespace jcdcdev.Valheim.Signs.Patches;
@@ -8,7 +9,7 @@ public class PlayerOnSpawned
 {
     public static void Postfix(Player __instance)
     {
-        SignsPlugin.Instance.Logger.LogDebug("PlayerOnSpawned.Postfix");
-        RPC.Client.InvokeDeathUpdateRequest(__instance);
+        Logger.LogError("PlayerOnSpawned.Postfix");
+        SignsPlugin.Instance.Client_SendDeathUpdateRequest(__instance);
     }
 }

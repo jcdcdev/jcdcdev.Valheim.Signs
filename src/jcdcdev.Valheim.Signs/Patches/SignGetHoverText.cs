@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using Jotunn;
 
 // ReSharper disable InconsistentNaming
 
@@ -10,13 +11,13 @@ public static class SignGetHoverText
 {
     public static void Postfix(Sign __instance, ref string __result)
     {
-        SignsPlugin.Instance.Logger.LogDebug("SignGetHoverText.Postfix");
+        Logger.LogDebug("SignGetHoverText.Postfix");
         try
         {
             var originalText = __result;
             if (!SignsPlugin.Instance.Client_GetSignHoverText(__instance, originalText, out var output))
             {
-                SignsPlugin.Instance.Logger.LogDebug("SignGetHoverText.Postfix: No output");
+                Logger.LogDebug("SignGetHoverText.Postfix: No output");
                 return;
             }
 
@@ -24,7 +25,7 @@ public static class SignGetHoverText
         }
         catch (Exception ex)
         {
-            SignsPlugin.Instance.Logger.LogError(ex);
+            Logger.LogError(ex);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using jcdcdev.Valheim.Signs.Extensions;
+﻿using jcdcdev.Valheim.Core.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 

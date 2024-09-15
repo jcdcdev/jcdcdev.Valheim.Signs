@@ -6,28 +6,56 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Bootstrap;
+using jcdcdev.Valheim.Core;
+using jcdcdev.Valheim.Core.RPC;
 using jcdcdev.Valheim.Signs.Converters;
 using jcdcdev.Valheim.Signs.Extensions;
 using jcdcdev.Valheim.Signs.Models;
+using jcdcdev.Valheim.Signs.RPC;
+using Jotunn.Managers;
+using Jotunn.Utils;
 
 namespace jcdcdev.Valheim.Signs;
 
 [BepInPlugin(Constants.PluginId, Constants.PluginName, VersionInfo.Version)]
+[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Patch)]
 public class SignsPlugin : BasePlugin<SignsPlugin>
 {
     public static readonly bool IsAzuSignsInstalled = Chainloader.PluginInfos.ContainsKey("Azumatt.AzuSigns");
 
     private static readonly List<IAmADynamicSign> DynamicSigns = new();
+    public readonly ISimpleRPC DeathLeaderboardUpdateRequest = new DeathLeaderboardUpdateRequest();
+    public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
 
-    private static readonly Regex RegexPattern = new(@"{{([^}}]+)}}", RegexOptions.Compiled);
+    public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
     private string LeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
-    protected override string PluginName => Constants.PluginName;
     protected override string PluginId => Constants.PluginId;
-    protected override string ConfigFileName => Constants.ConfigFileName;
-    protected override string CurrentVersion => VersionInfo.Version;
 
     protected override void OnAwake()
+    {
+        DeathUpdate.Initialise(NetworkManager.Instance);
+        DeathLeaderboardUpdateRequest.Initialise(NetworkManager.Instance);
+        DeathLeaderboardUpdateResponse.Initialise(NetworkManager.Instance);
+
+        AddSigns();
+        EnsureLeaderboardFileExists();
+    }
+
+    private void EnsureLeaderboardFileExists()
+    {
+        if (!File.Exists(LeaderboardPath))
+        {
+            var model = new PlayerDeathLeaderBoard
+            {
+                Players = new List<PlayerDeathInfo>(),
+                Updated = DateTime.MinValue
+            };
+            WriteJsonToFile(model, LeaderboardPath);
+        }
+    }
+
+    private void AddSigns()
     {
         var types = Assembly.GetExecutingAssembly().GetTypes();
         foreach (var type in types)
@@ -47,26 +75,12 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
                 AddSign(sign);
             }
         }
-
-        if (Network.IsServer)
-        {
-            if (!File.Exists(LeaderboardPath))
-            {
-                var model = new PlayerDeathLeaderBoard
-                {
-                    Players = new List<PlayerDeathInfo>(),
-                    Updated = DateTime.MinValue
-                };
-                WriteJsonToFile(model, LeaderboardPath);
-            }
-        }
     }
 
     private void AddSign(IAmADynamicSign sign) => DynamicSigns.Add(sign);
 
     public bool Client_GetSignText(Sign sign, string signText, out string output)
     {
-        Logger.LogDebug($"Sign Text: {signText}");
         output = signText;
         var originalValue = Client_GetTokenValue(signText);
         if (originalValue == null)
@@ -89,13 +103,13 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             return false;
         }
 
-        output = RegexPattern.Replace(signText, result, 1);
+        output = Constants.HandlebarRegexPattern.Replace(signText, result, 1);
         return true;
     }
 
     private static string? Client_GetTokenValue(string originalText)
     {
-        var match = RegexPattern.Match(originalText);
+        var match = Constants.HandlebarRegexPattern.Match(originalText);
         var originalValue = match.Groups[1].Value;
         return match.Success ? originalValue : null;
     }
@@ -107,7 +121,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         var originalValue = Client_GetTokenValue(originalText);
         if (originalValue == null)
         {
-            Logger.LogWarning("No token found.");
+            Logger.LogDebug("No token found.");
             return false;
         }
 
@@ -121,7 +135,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         var hover = converter.GetSignHoverText(sign, originalText);
         if (hover == null || hover.IsNullOrWhiteSpace())
         {
-            Logger.LogWarning("No hover found.");
+            Logger.LogWarning("No hover text found.");
             return false;
         }
 
@@ -134,7 +148,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
     public PlayerDeathLeaderBoard? Server_GetDeathLeaderboard()
     {
-        if (!Network.IsServer)
+        if (!ZNet.instance.IsLocalOrServer())
         {
             Logger.LogWarning("GetServerDeathLeaderBoardModel called on client.");
             return null;
@@ -168,20 +182,20 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
     public PlayerDeathLeaderBoard? Client_GetOrRequestDeathLeaderboard()
     {
-        if (!Network.IsClient)
+        if (!ZNet.instance.IsLocalOrClient())
         {
             Logger.LogWarning($"Client method called on server: {nameof(Client_GetOrRequestDeathLeaderboard)}");
             return null;
         }
 
-        var model = Client_GetCacheItem<PlayerDeathLeaderBoard>(Constants.CacheKeys.DeathLeaderboard);
+        var model = GetCacheItem<PlayerDeathLeaderBoard>(Constants.CacheKeys.DeathLeaderboard);
         if (model != null)
         {
             Logger.LogDebug("Using cached death leaderboard.");
             return model;
         }
 
-        RPC.Client.InvokeDeathLeaderboardUpdateRequest();
+        DeathLeaderboardUpdateRequest.SendToServer(DateTime.MinValue.Ticks);
         return null;
     }
 
@@ -215,7 +229,18 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
         model.Players = model.Players.OrderByDescending(x => x.Deaths).ToList();
         model.Updated = DateTime.UtcNow;
-        RPC.Server.Send_DeathLeaderboard(ZRoutedRpc.Everybody, model);
+        DeathLeaderboardUpdateResponse.SendAll(model);
         WriteJsonToFile(model, path);
+    }
+
+    public void Client_SendDeathUpdateRequest(Player player)
+    {
+        if (!ZNet.instance.IsLocalOrClient())
+        {
+            Logger.LogWarning("InvokeDeathUpdateRequest called on server.");
+            return;
+        }
+
+        DeathUpdate.SendToServer(player.GetDeathInfo());
     }
 }
