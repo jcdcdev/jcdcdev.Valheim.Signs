@@ -81,7 +81,7 @@ jobs:
           fetch-depth: 0
       - name: Create tag
         shell: bash
-        if: ${{ env.DRY_RUN == false }}
+        if: ${{ env.DRY_RUN != false }}
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
