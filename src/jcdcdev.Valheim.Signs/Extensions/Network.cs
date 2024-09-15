@@ -2,7 +2,11 @@
 
 public static class Network
 {
-    public static bool IsServer => ZNet.m_isServer || ZNet.IsSinglePlayer;
+    private static bool IsLocalInstance(this ZNet znet) => znet.IsServer() && !znet.IsDedicated();
+    private static bool IsClientInstance(this ZNet znet) => !znet.IsServer() && !znet.IsDedicated();
+    private static bool IsServerInstance(this ZNet znet) => znet.IsServer() && znet.IsDedicated();
 
-    public static bool IsClient => !IsServer;
+    public static bool IsServer => IsLocal || ZNet.instance.IsServerInstance();
+    public static bool IsClient => IsLocal || ZNet.instance.IsClientInstance();
+    public static bool IsLocal => ZNet.instance.IsLocalInstance();
 }

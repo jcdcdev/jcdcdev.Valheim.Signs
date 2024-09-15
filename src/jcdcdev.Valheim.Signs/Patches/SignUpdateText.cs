@@ -24,24 +24,50 @@ public static class SignUpdateText
         {
             view.ClaimOwnership();
             var zdo = view.GetZDO();
-            var text = zdo.GetString("newText");
-            if (text.IsNullOrWhiteSpace())
-            {
-                text = zdo.GetString("text", __instance.m_defaultText);
-            }
-
+            var text = GetSignText(__instance, zdo);
             if (!SignsPlugin.Instance.Client_GetSignText(__instance, text, out var output))
             {
                 SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: No output");
                 return;
             }
 
-            __instance.m_textWidget.text = output;
-            zdo.Set("newText", output);
+            SetSignText(__instance, zdo, output);
         }
         catch (Exception ex)
         {
             SignsPlugin.Instance.Logger.LogError(ex);
         }
+    }
+
+    private static void SetSignText(Sign __instance, ZDO zdo, string output)
+    {
+        if (SignsPlugin.IsAzuSignsInstalled)
+        {
+            zdo.Set("newText", output);
+        }
+
+        __instance.m_textWidget.text = output;
+    }
+
+    private static string GetSignText(Sign __instance, ZDO zdo)
+    {
+        var newText = zdo.GetString("newText");
+        var text = zdo.GetString("text");
+        var defaultText = __instance.m_defaultText;
+        string output;
+        if (SignsPlugin.IsAzuSignsInstalled)
+        {
+            output = newText.IsNullOrWhiteSpace() ? text : newText;
+        }
+        else
+        {
+            output = text.IsNullOrWhiteSpace() ? defaultText : text;
+        }
+
+        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: NEW TEXT: " + newText);
+        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: TEXT: " + text);
+        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: DEFAULT: " + defaultText);
+        SignsPlugin.Instance.Logger.LogDebug("SignUpdateText.Postfix: RESULT OUTPUT: " + output);
+        return output;
     }
 }

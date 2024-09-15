@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using BepInEx;
+using BepInEx.Bootstrap;
 using jcdcdev.Valheim.Signs.Converters;
 using jcdcdev.Valheim.Signs.Extensions;
 using jcdcdev.Valheim.Signs.Models;
@@ -14,6 +15,8 @@ namespace jcdcdev.Valheim.Signs;
 [BepInPlugin(Constants.PluginId, Constants.PluginName, VersionInfo.Version)]
 public class SignsPlugin : BasePlugin<SignsPlugin>
 {
+    public static readonly bool IsAzuSignsInstalled = Chainloader.PluginInfos.ContainsKey("Azumatt.AzuSigns");
+
     private static readonly List<IAmADynamicSign> DynamicSigns = new();
 
     private static readonly Regex RegexPattern = new(@"{{([^}}]+)}}", RegexOptions.Compiled);
