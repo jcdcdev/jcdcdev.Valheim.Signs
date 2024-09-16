@@ -10,27 +10,43 @@ public class SkillSign : IAmADynamicSign
 
     public string? GetSignText(Sign sign, string input)
     {
-        var option = GetOption(input);
-        if (string.IsNullOrWhiteSpace(option))
-        {
-            return Constants.ErrorMessage("No skill provided");
-        }
-
-        if (!Enum.TryParse(option, true, out Skills.SkillType skill))
+        var withEmoji = input.Contains("emoji");
+        var withLabel = input.Contains("label");
+        var skill = GetSkill(input);
+        if (skill == Skills.SkillType.None)
         {
             return Constants.ErrorMessage("Invalid skill");
         }
 
         var player = Player.m_localPlayer;
         var value = player.GetSkillLevel(skill);
-        return $"{value:F0}";
+        var output = string.Empty;
+        if (withEmoji)
+        {
+            output = $"{skill.ToEmoji()} ";
+        }
+        if (withLabel)
+        {
+            output += $"{skill} ";
+        }
+        output += $"{value:F0}";
+        return output;
     }
 
-    private static string? GetOption(string input)
+    private static Skills.SkillType GetSkill(string input)
     {
         var option = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).FirstOrDefault();
-        return option;
+        if (!Enum.TryParse(option, true, out Skills.SkillType skill))
+        {
+            return Skills.SkillType.None;
+        }
+
+        return skill;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Skill";
+    public string? GetSignHoverText(Sign sign, string input)
+    {
+        var skill = GetSkill(input);
+        return skill == Skills.SkillType.None ? Constants.DefaultHoverError : skill.ToString();
+    }
 }

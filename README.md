@@ -76,6 +76,7 @@ Displays the skill level of the player.
 `{{skill bows}}`
 
 ![In game screenshot of the Skills sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/skill.png)
+![In game screenshot of the Skills with Label & Emoji sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/skill-options.png)
 
 #### Skills
 
@@ -99,6 +100,13 @@ Displays the skill level of the player.
 - Swords
 - Unarmed
 - WoodCutting
+
+#### Options
+
+| Option  | Description   | Example                | Example Output |
+|---------|---------------|------------------------|----------------|
+| `emoji` | Adds an emoji | `{{skill bows emoji}}` | `🏹 100`       |
+| `label` | Adds a label  | `{{skill bows label}}` | `Bows 100`     |
 
 ### Game Time
 
