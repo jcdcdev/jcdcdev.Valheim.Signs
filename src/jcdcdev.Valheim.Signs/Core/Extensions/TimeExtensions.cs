@@ -57,12 +57,6 @@ public static class TimeExtensions
         return dateTimeNow;
     }
 
-    public static string? GetRealTime(string? format = "HH:mm", TimeZoneInfo? timeZone = null)
-    {
-        var localNow = LocalNow(timeZone);
-        return localNow.ToString(format);
-    }
-
     public static DateTime LocalNow(TimeZoneInfo? timeZone)
     {
         timeZone ??= TimeZoneInfo.Local;
@@ -90,6 +84,18 @@ public static class TimeExtensions
                 9 => "🕘",
                 10 => "🕙",
                 11 => "🕚",
+                12 => "🕛",
+                13 => "🕐",
+                14 => "🕑",
+                15 => "🕒",
+                16 => "🕓",
+                17 => "🕔",
+                18 => "🕕",
+                19 => "🕖",
+                20 => "🕗",
+                21 => "🕘",
+                22 => "🕙",
+                23 => "🕚",
                 _ => "🕛" // Default case
             },
             _ => hour switch
@@ -106,6 +112,18 @@ public static class TimeExtensions
                 9 => "🕤",
                 10 => "🕥",
                 11 => "🕦",
+                12 => "🕧",
+                13 => "🕜",
+                14 => "🕝",
+                15 => "🕞",
+                16 => "🕟",
+                17 => "🕠",
+                18 => "🕡",
+                19 => "🕢",
+                20 => "🕣",
+                21 => "🕤",
+                22 => "🕥",
+                23 => "🕦",
                 _ => "🕧" // Default case
             }
         };
