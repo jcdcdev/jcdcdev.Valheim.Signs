@@ -46,7 +46,7 @@ public static class TimeExtensions
         return $"{fuzzyTime}";
     }
 
-    public static string GetCurrentTimeString(string? format = "HH:mm")
+    public static DateTime ServerTimeNow()
     {
         var hour = (int)(SmoothDayFraction * 24f);
         var minute = (int)((SmoothDayFraction * 24f - hour) * 60f);
@@ -54,13 +54,60 @@ public static class TimeExtensions
 
         var now = DateTime.Now;
         var dateTimeNow = new DateTime(now.Year, now.Month, now.Day, hour, minute, second);
-        return dateTimeNow.ToString(format);
+        return dateTimeNow;
     }
 
     public static string? GetRealTime(string? format = "HH:mm", TimeZoneInfo? timeZone = null)
     {
+        var localNow = LocalNow(timeZone);
+        return localNow.ToString(format);
+    }
+
+    public static DateTime LocalNow(TimeZoneInfo? timeZone)
+    {
         timeZone ??= TimeZoneInfo.Local;
         var localNow = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
-        return localNow.ToString(format);
+        return localNow;
+    }
+
+    public static string ToEmojiClock(this DateTime? time)
+    {
+        var hour = time?.Hour ?? 0;
+        var minute = time?.Minute ?? 0;
+        return minute switch
+        {
+            >= 0 and < 30 => hour switch
+            {
+                0 => "🕛",
+                1 => "🕐",
+                2 => "🕑",
+                3 => "🕒",
+                4 => "🕓",
+                5 => "🕔",
+                6 => "🕕",
+                7 => "🕖",
+                8 => "🕗",
+                9 => "🕘",
+                10 => "🕙",
+                11 => "🕚",
+                _ => "🕛" // Default case
+            },
+            _ => hour switch
+            {
+                0 => "🕧",
+                1 => "🕜",
+                2 => "🕝",
+                3 => "🕞",
+                4 => "🕟",
+                5 => "🕠",
+                6 => "🕡",
+                7 => "🕢",
+                8 => "🕣",
+                9 => "🕤",
+                10 => "🕥",
+                11 => "🕦",
+                _ => "🕧" // Default case
+            }
+        };
     }
 }

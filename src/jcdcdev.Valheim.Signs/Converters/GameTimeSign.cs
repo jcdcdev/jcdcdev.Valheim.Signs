@@ -9,8 +9,14 @@ public class GameTimeSign : IAmADynamicSign
 
     public string? GetSignText(Sign sign, string input)
     {
+        var time = TimeExtensions.ServerTimeNow();
+        if (input.Contains("emoji"))
+        {
+            return TimeExtensions.ToEmojiClock(time);
+        }
+
         var format = TimeExtensions.GetTimeFormat(input);
-        return TimeExtensions.GetCurrentTimeString(format);
+        return time.ToString(format);
     }
 
     public string? GetSignHoverText(Sign sign, string input) => "Game Time";

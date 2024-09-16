@@ -9,8 +9,14 @@ public class ActualTimeSign : IAmADynamicSign
 
     public string? GetSignText(Sign sign, string input)
     {
+        var time = TimeExtensions.LocalNow(TimeZoneInfo.Local);
+        if (input.Contains("emoji"))
+        {
+            return TimeExtensions.ToEmojiClock(time);
+        }
+
         var format = TimeExtensions.GetTimeFormat(input);
-        return TimeExtensions.GetRealTime(format, TimeZoneInfo.Local);
+        return time.ToString(format);
     }
 
     public string? GetSignHoverText(Sign sign, string input) => "Actual Time";

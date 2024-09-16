@@ -107,13 +107,15 @@ Displays the current in-game time.
 `{{gameTime}}`
 
 ![In game screenshot of the Game Time sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/game-time.png)
+![In game screenshot of the Game Time Emoji sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/emoji-clock.png)
 
 #### Options
 
-| Option | Description               | Example           | Example Output |
-|--------|---------------------------|-------------------|----------------|
-| `12`   | Outputs in 12 hour format | `{{gameTime 12}}` | `12:00 AM`     |
-| `s`    | Adds seconds to the time  | `{{gameTime s}}`  | `12:00:00`     |
+| Option  | Description               | Example              | Example Output |
+|---------|---------------------------|----------------------|----------------|
+| `12`    | Outputs in 12 hour format | `{{gameTime 12}}`    | `12:00 AM`     |
+| `s`     | Adds seconds to the time  | `{{gameTime s}}`     | `12:00:00`     |
+| `emoji` | Outputs as an emoji       | `{{gameTime emoji}}` | `🕛`           |
 
 ### Actual Time
 
@@ -125,12 +127,13 @@ Displays the current time.
 
 #### Options
 
-| Option | Description                | Example             | Example Output            |
-|--------|----------------------------|---------------------|---------------------------|
-| `12`   | Outputs in 12 hour format  | `{{actualTime 12}}` | `12:00 AM`                |
-| `s`    | Adds seconds to the time   | `{{actualTime s}}`  | `12:00:00`                |
-| `f`    | Outputs full date and time | `{{actualTime f}}`  | `06 September 2024 09:08` |
-| `g`    | Outputs date and time      | `{{actualTime g}}`  | `06/09/2024 09:08`        |
+| Option  | Description                | Example              | Example Output            |
+|---------|----------------------------|----------------------|---------------------------|
+| `12`    | Outputs in 12 hour format  | `{{actualTime 12}}`  | `12:00 AM`                |
+| `s`     | Adds seconds to the time   | `{{actualTime s}}`   | `12:00:00`                |
+| `f`     | Outputs full date and time | `{{actualTime f}}`   | `06 September 2024 09:08` |
+| `g`     | Outputs date and time      | `{{actualTime g}}`   | `06/09/2024 09:08`        |
+| `emoji` | Outputs as an emoji        | `{{gameTime emoji}}` | `🕛`                      |
 
 ## Installation
 
