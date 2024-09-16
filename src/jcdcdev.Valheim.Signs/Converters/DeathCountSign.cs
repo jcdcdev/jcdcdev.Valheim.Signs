@@ -14,8 +14,8 @@ public class DeathCountSign : IAmADynamicSign
 
     public string? GetSignText(Sign sign, string input)
     {
-        var playerId = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).FirstOrDefault();
-        if (playerId == null || playerId.IsNullOrWhiteSpace())
+        var playerId = input.ToLowerInvariant().Replace("deathcount", string.Empty).Trim();
+        if (playerId.IsNullOrWhiteSpace())
         {
             return Player.m_localPlayer?.GetDeathCount().ToString();
         }
