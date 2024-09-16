@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,6 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     private static readonly List<IAmADynamicSign> DynamicSigns = new();
     public readonly ISimpleRPC DeathLeaderboardUpdateRequest = new DeathLeaderboardUpdateRequest();
     public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
-
     public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
     private string LeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
@@ -79,46 +79,97 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
     private void AddSign(IAmADynamicSign sign) => DynamicSigns.Add(sign);
 
-    public bool Client_GetSignText(Sign sign, string signText, out string output)
+    public bool TryGetSignText(Sign sign, string? input, out string? output)
     {
-        output = signText;
-        var originalValue = Client_GetTokenValue(signText);
-        if (originalValue == null)
+        output = null;
+        if (input == null)
         {
             Logger.LogDebug("No token found.");
             return false;
         }
 
-        var converter = DynamicSigns.FirstOrDefault(x => x.CanConvert(sign, originalValue));
+        var converter = DynamicSigns.FirstOrDefault(x => x.CanConvert(sign, input));
         if (converter == null)
         {
-            Logger.LogWarning($"No converter found for {originalValue}");
+            Logger.LogWarning($"No converter found for {input}");
             return false;
         }
 
-        var result = converter.GetSignText(sign, originalValue);
+        var result = converter.GetSignText(sign, input);
         if (result == null || result.IsNullOrWhiteSpace())
         {
             Logger.LogWarning("No result found.");
             return false;
         }
 
-        output = Constants.HandlebarRegexPattern.Replace(signText, result, 1);
+        output = result;
         return true;
     }
 
-    private static string? Client_GetTokenValue(string originalText)
+    public bool Client_GetSignText(Sign sign, string signText, out string output)
     {
-        var match = Constants.HandlebarRegexPattern.Match(originalText);
-        var originalValue = match.Groups[1].Value;
-        return match.Success ? originalValue : null;
+        output = signText;
+        var originalValues = Client_GetTokenValue(signText);
+        foreach (var originalValue in originalValues)
+        {
+            if (!TryGetSignText(sign, originalValue, out var result) || result == null)
+            {
+                continue;
+            }
+
+            output = output.Replace("{{" + originalValue + "}}", result);
+        }
+
+        return output != signText;
+    }
+
+    private static IEnumerable<string> Client_GetTokenValue(string originalText)
+    {
+        var match = Constants.HandlebarRegexPattern.Matches(originalText);
+        if (match.Count == 0)
+        {
+            return new List<string>();
+        }
+
+        var output = new List<string>();
+        foreach (Match item in match)
+        {
+            output.Add(item.Groups[1].Value);
+        }
+
+        return output;
     }
 
     public bool Client_GetSignHoverText(Sign sign, string originalText, out string output)
     {
         Logger.LogDebug($"Sign Hover: {originalText}");
         output = string.Empty;
-        var originalValue = Client_GetTokenValue(originalText);
+        var originalValues = Client_GetTokenValue(originalText);
+        var values = new List<string>();
+        foreach (var originalValue in originalValues)
+        {
+            if (!TryGetSignHoverText(sign, originalValue, out var result) || result == null)
+            {
+                continue;
+            }
+
+            values.Add(result);
+        }
+
+        if (values.Count == 0)
+        {
+            return false;
+        }
+
+        var hover = $"[<color=\"yellow\">DYNAMIC</color>] {string.Join(" ", values)}";
+        output = Constants.HoverTextRegexPattern.Replace(originalText, $"{hover}");
+        Logger.LogDebug($"Sign Hover: {output}");
+        return output != originalText;
+    }
+
+    private bool TryGetSignHoverText(Sign sign, string? originalValue, out string? hover)
+    {
+        hover = null;
         if (originalValue == null)
         {
             Logger.LogDebug("No token found.");
@@ -132,18 +183,15 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             return false;
         }
 
-        var hover = converter.GetSignHoverText(sign, originalText);
-        if (hover == null || hover.IsNullOrWhiteSpace())
+        var result = converter.GetSignHoverText(sign, originalValue);
+        if (result == null || result.IsNullOrWhiteSpace())
         {
             Logger.LogWarning("No hover text found.");
             return false;
         }
 
-        var regex = new Regex("\"([^\"]*)\"");
-        hover = $"\"[<color=\"yellow\">DYNAMIC</color>] {hover}\"";
-        output = regex.Replace(originalText, $"{hover}");
-        Logger.LogDebug($"Sign Hover: {output}");
-        return output != originalText;
+        hover = result;
+        return true;
     }
 
     public PlayerDeathLeaderBoard? Server_GetDeathLeaderboard()

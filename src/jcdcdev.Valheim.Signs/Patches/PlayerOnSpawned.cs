@@ -9,7 +9,7 @@ public class PlayerOnSpawned
 {
     public static void Postfix(Player __instance)
     {
-        Logger.LogError("PlayerOnSpawned.Postfix");
+        Logger.LogDebug("PlayerOnSpawned.Postfix");
         SignsPlugin.Instance.Client_SendDeathUpdateRequest(__instance);
     }
 }
