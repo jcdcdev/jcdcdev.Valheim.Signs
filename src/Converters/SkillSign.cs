@@ -10,6 +10,12 @@ public class SkillSign : IAmADynamicSign
 
     public string? GetSignText(Sign sign, string input)
     {
+        var player = Player.m_localPlayer;
+        if (player == null)
+        {
+            return Constants.ErrorMessage("Player not found");
+        }
+
         var withEmoji = input.Contains("emoji");
         var withLabel = input.Contains("label");
         var skill = GetSkill(input);
@@ -18,7 +24,6 @@ public class SkillSign : IAmADynamicSign
             return Constants.ErrorMessage("Invalid skill");
         }
 
-        var player = Player.m_localPlayer;
         var value = player.GetSkillLevel(skill);
         var output = string.Empty;
         if (withEmoji)
