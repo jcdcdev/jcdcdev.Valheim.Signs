@@ -1,0 +1,70 @@
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Run the workflow without updating the packages'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: '0 0 * * *'
+name: 🔃 Update NuGet Dependencies
+
+jobs:
+  update-packages:
+    runs-on: windows-latest
+    env:
+      packageId: JotunnLib
+      projectFilePath: 'src/jcdcdev.Valheim.Signs.sln'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+      - name: Install dotnet outdated
+        run: dotnet tool install --global dotnet-outdated-tool
+      - name: Update packages
+        id: run-dotnet-outdated
+        shell: pwsh
+        run: |
+          dotnet outdated ${{ env.projectFilePath }} -u -utd -o ./report.json -of Json
+          $data = Get-Content ./report.json -Raw | ConvertFrom-Json
+          $dependencies = $data.Projects[0].TargetFrameworks[0].Dependencies
+          $package = $dependencies | Where-Object -Property Name -eq '${{ env.packageId }}'
+
+          $currentVersion = $package.ResolvedVersion
+          $latestVersion = $package.LatestVersion
+          $updateFound = $currentVersion -ne $latestVersion
+
+          echo "currentVersion=$currentVersion" >> $env:GITHUB_OUTPUT
+          echo "latestVersion=$latestVersion" >> $env:GITHUB_OUTPUT
+          echo "updateFound=$updateFound" >> $env:GITHUB_OUTPUT
+
+          if(-not $updateFound) {
+            echo "No updates available for ${{ env.packageId }}"
+            exit 0
+          }
+      - name: 🤖 Make Pull Request
+        if: steps.run-dotnet-outdated.outputs.updateFound == 'true' && github.event.inputs.dry-run != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feature: Support ${{ env.packageId }} ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          title: "Update ${{ env.packageId }} from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          body: "This PR updates the ${{ env.packageId }} NuGet package from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}."
+          branch: "update-${{ env.packageId }}-from-${{ steps.run-dotnet-outdated.outputs.currentVersion }}-to-${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          labels: "automated,dependencies,${{ env.packageId }}"
+          reviewers: ${{ github.repository_owner}}
+          assignees: ${{ github.repository_owner}}
+
+
+
+
+
+
