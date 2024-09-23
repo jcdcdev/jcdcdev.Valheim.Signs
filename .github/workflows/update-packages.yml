@@ -10,46 +10,45 @@ on:
     - cron: '0 0 * * *'
 name: 🔃 Update NuGet Dependencies
 
+env:
+  PACKAGE_ID: JotunnLib
+  PROJECT_PATH: ${{ github.workspace }}/src/jcdcdev.Valheim.Signs.csproj
+
 jobs:
   update-packages:
     runs-on: windows-latest
-    env:
-      packageId: JotunnLib
-      projectFilePath: 'src/jcdcdev.Valheim.Signs.csproj'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/checkout@v4
+      - name: Install Dotnet
+        uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.x
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v2
+          dotnet-version: '8.0.x'
       - name: Restore Packages
-        run: nuget restore ${{ env.projectFilePath }}
+        run: |
+          dotnet restore ${{ env.PROJECT_PATH }}
       - name: Install dotnet outdated
         run: dotnet tool install --global dotnet-outdated-tool
       - name: Update packages
         id: run-dotnet-outdated
         shell: pwsh
         run: |
-          dotnet outdated ${{ env.projectFilePath }} -u -utd -o ./report.json -of Json
+          dotnet outdated ${{ env.PROJECT_PATH }} -u -utd -o ./report.json -of Json
           $data = Get-Content ./report.json -Raw | ConvertFrom-Json
           $dependencies = $data.Projects[0].TargetFrameworks[0].Dependencies
-          $package = $dependencies | Where-Object -Property Name -eq '${{ env.packageId }}'
+          $package = $dependencies | Where-Object -Property Name -eq '${{ env.PACKAGE_ID }}'
 
           $currentVersion = $package.ResolvedVersion
           $latestVersion = $package.LatestVersion
           $updateFound = $currentVersion -ne $latestVersion
 
+          echo "$currentVersion => $latestVersion"
           echo "currentVersion=$currentVersion" >> $env:GITHUB_OUTPUT
           echo "latestVersion=$latestVersion" >> $env:GITHUB_OUTPUT
           echo "updateFound=$updateFound" >> $env:GITHUB_OUTPUT
 
           if(-not $updateFound) {
-            echo "No updates available for ${{ env.packageId }}"
+            echo "No updates available for ${{ env.PACKAGE_ID }}"
             exit 0
           }
       - name: 🤖 Make Pull Request
@@ -57,11 +56,11 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "feature: Support ${{ env.packageId }} ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
-          title: "Update ${{ env.packageId }} from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
-          body: "This PR updates the ${{ env.packageId }} NuGet package from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}."
-          branch: "update-${{ env.packageId }}-from-${{ steps.run-dotnet-outdated.outputs.currentVersion }}-to-${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
-          labels: "automated,dependencies,${{ env.packageId }}"
+          commit-message: "feature: Support ${{ env.PACKAGE_ID }} ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          title: "Update ${{ env.PACKAGE_ID }} from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          body: "This PR updates the ${{ env.PACKAGE_ID }} NuGet package from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}."
+          branch: "update-${{ env.PACKAGE_ID }}-from-${{ steps.run-dotnet-outdated.outputs.currentVersion }}-to-${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
+          labels: "automated,dependencies,${{ env.PACKAGE_ID }}"
           reviewers: ${{ github.repository_owner}}
           assignees: ${{ github.repository_owner}}
 

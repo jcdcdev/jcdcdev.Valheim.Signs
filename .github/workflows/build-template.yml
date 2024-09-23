@@ -33,8 +33,7 @@ env:
     MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
     ARTIFACT_PATH: ${{ github.workspace }}/mod/
     VALHEIM_INSTALL: ${{ github.workspace }}\valheim
-    VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
-    PACKAGES_CONFIG: ${{ github.workspace }}/src/${{ inputs.project-name }}/packages.config
+    VERSION_INFO_FILE: ${{ github.workspace }}/src/VersionInfo.cs
 jobs:
     determine-version:
         name: determine version
@@ -72,8 +71,8 @@ jobs:
             -   name: Get Jotunn version id
                 id: jotunn-version
                 run: |
-                    # Get Jotunn version from packages.config
-                    JOTUNN_PACKAGE_VERSION=$(grep -oP 'JotunnLib" version="\K[^"]+' ${{ env.PACKAGES_CONFIG }})
+                    # Get Jotunn version from csproj
+                    JOTUNN_PACKAGE_VERSION=$(grep -oP 'JotunnLib" Version="\K[^"]+' ${{ env.PROJECT_PATH }})
                     echo "Jotunn Package Version: $JOTUNN_PACKAGE_VERSION"
                     if [ -z "$JOTUNN_PACKAGE_VERSION" ]; then
                         echo "Jotunn package version not found"
@@ -189,7 +188,7 @@ jobs:
 
             -   name: Build Solution
                 run: |
-                    Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
+                    Write-Host "Building solution ${{ env.PROJECT_PATH }}"
                     msbuild.exe ${{ env.PROJECT_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
             -   name: Copy mod files to output
                 run: |
