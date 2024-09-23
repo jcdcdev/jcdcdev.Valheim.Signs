@@ -15,7 +15,7 @@ jobs:
     runs-on: windows-latest
     env:
       packageId: JotunnLib
-      projectFilePath: 'src/jcdcdev.Valheim.Signs.sln'
+      projectFilePath: 'src/jcdcdev.Valheim.Signs.csproj'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -27,6 +27,8 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
+      - name: Restore Packages
+        run: nuget restore ${{ env.projectFilePath }}
       - name: Install dotnet outdated
         run: dotnet tool install --global dotnet-outdated-tool
       - name: Update packages

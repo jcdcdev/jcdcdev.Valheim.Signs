@@ -28,11 +28,10 @@ on:
                 value: ${{ jobs.determine-version.outputs.jotunn-version }}
 
 env:
-    PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
+    PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.csproj
     BUILD_OUTPUT: ${{ github.workspace }}/build-output/
     MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
     ARTIFACT_PATH: ${{ github.workspace }}/mod/
-    SOLUTION_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.sln
     VALHEIM_INSTALL: ${{ github.workspace }}\valheim
     VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
     PACKAGES_CONFIG: ${{ github.workspace }}/src/${{ inputs.project-name }}/packages.config
@@ -180,7 +179,7 @@ jobs:
 
             -   name: Restore Packages
                 run: |
-                    nuget restore ${{ env.SOLUTION_PATH }}
+                    nuget restore ${{ env.PROJECT_PATH }}
 
             -   name: Set version file
                 run: |
@@ -191,7 +190,7 @@ jobs:
             -   name: Build Solution
                 run: |
                     Write-Host "Building solution ${{ env.SOLUTION_PATH }}"
-                    msbuild.exe ${{ env.SOLUTION_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
+                    msbuild.exe ${{ env.PROJECT_PATH }} /nologo /nr:false /p:configuration="Release" /p:Version="${{ env.MOD_VERSION }}" /p:AssemblyVersion="${{ env.MOD_VERSION }}" /p:OutputPath="${{ env.BUILD_OUTPUT }}" /p:ExecutePrebuild=true /p:VALHEIM_INSTALL="${{ env.VALHEIM_INSTALL }}"
             -   name: Copy mod files to output
                 run: |
                     Write-Host "Copying mod files to output"
