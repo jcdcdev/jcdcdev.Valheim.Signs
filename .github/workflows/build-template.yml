@@ -28,12 +28,12 @@ on:
                 value: ${{ jobs.determine-version.outputs.jotunn-version }}
 
 env:
-    PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}.csproj
+    PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
     BUILD_OUTPUT: ${{ github.workspace }}/build-output/
     MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
     ARTIFACT_PATH: ${{ github.workspace }}/mod/
     VALHEIM_INSTALL: ${{ github.workspace }}\valheim
-    VERSION_INFO_FILE: ${{ github.workspace }}/src/VersionInfo.cs
+    VERSION_INFO_FILE: ${{ github.workspace }}/src/${{ inputs.project-name }}/VersionInfo.cs
 jobs:
     determine-version:
         name: determine version
