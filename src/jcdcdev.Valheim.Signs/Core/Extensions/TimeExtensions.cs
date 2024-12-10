@@ -8,11 +8,12 @@ public static class TimeExtensions
 {
     private static readonly TimeSpan DayStartTime = new(6, 0, 0);
     private static readonly TimeSpan NightStartTime = new(18, 0, 0);
+
     public static TimeSpan CalculateTimeLeftInDay()
     {
         var currentDate = ServerTimeNow();
         var currentTime = currentDate.TimeOfDay;
-        Logger.LogError($"Game Time:\n\n{currentTime}\nServer Time:\n\n{LocalNow().TimeOfDay}");
+        Logger.LogDebug($"Game Time:\n\n{currentTime}\nServer Time:\n\n{LocalNow().TimeOfDay}");
 
         if (currentTime < DayStartTime || currentTime >= NightStartTime)
         {
@@ -20,8 +21,8 @@ public static class TimeExtensions
         }
 
         return NightStartTime - currentTime;
-
     }
+
     public static float SmoothDayFraction => EnvMan.instance.m_smoothDayFraction;
     public static int CurrentDay => EnvMan.instance.GetCurrentDay();
 
