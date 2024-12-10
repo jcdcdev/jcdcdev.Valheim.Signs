@@ -143,6 +143,14 @@ Displays the current time.
 | `g`     | Outputs date and time      | `{{actualTime g}}`   | `06/09/2024 09:08`        |
 | `emoji` | Outputs as an emoji        | `{{gameTime emoji}}` | `🕛`                      |
 
+### Day Percentage
+
+Displays the current day percentage.
+
+`{{dayPercentage}}`
+
+![In game screenshot of the Day Percentage sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/day-percent.png)
+
 ## Installation
 
 This mod **must** be installed on the server and all clients to work.
