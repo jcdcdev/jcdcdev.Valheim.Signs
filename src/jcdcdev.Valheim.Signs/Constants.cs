@@ -9,6 +9,7 @@ public static class Constants
     public static readonly Regex HandlebarRegexPattern = new("{{([^}}]+)}}", RegexOptions.Compiled);
     public static readonly Regex HoverTextRegexPattern = new("\"([^\"]*)\"", RegexOptions.Compiled);
 
+
     public static class CacheKeys
     {
         public static string DeathLeaderboard => "DeathLeaderboard";

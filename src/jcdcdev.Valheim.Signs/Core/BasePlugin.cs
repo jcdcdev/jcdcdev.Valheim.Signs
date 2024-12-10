@@ -5,6 +5,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using jcdcdev.Valheim.Core.Extensions;
 using jcdcdev.Valheim.Core.RPC;
 using JetBrains.Annotations;
 using Jotunn;
@@ -29,11 +30,19 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
     [UsedImplicitly]
     private void Awake()
     {
-        _instance = this as TPlugin ?? throw new InvalidOperationException($"Plugin {PluginId} is not initialised correctly");
-        EnsureConfigDirectoryExists();
-        BadRequest.Initialise(NetworkManager.Instance);
-        OnAwake();
-        _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
+        try
+        {
+            _instance = this as TPlugin ?? throw new InvalidOperationException($"Plugin {PluginId} is not initialised correctly");
+            EnsureConfigDirectoryExists();
+            BadRequest.Initialise(NetworkManager.Instance);
+            OnAwake();
+            _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogIssue(ex, "Error during plugin initialisation");
+            throw;
+        }
     }
 
     [UsedImplicitly]
@@ -79,7 +88,7 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex);
+            Logger.LogIssue(ex, $"Error reading {typeof(T).Name} from file");
             return null;
         }
     }
@@ -90,10 +99,11 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         {
             var contents = JsonHelper.ToJson(model);
             File.WriteAllText(path, contents);
+            throw new Exception("Test Error");
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex);
+            Logger.LogIssue(ex, $"Error writing {model.GetType().Name} to file");
         }
     }
 }

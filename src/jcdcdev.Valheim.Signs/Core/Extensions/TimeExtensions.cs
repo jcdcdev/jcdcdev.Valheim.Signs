@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
+using Logger = Jotunn.Logger;
 
 namespace jcdcdev.Valheim.Core.Extensions;
 
 public static class TimeExtensions
 {
-    private static float SmoothDayFraction => EnvMan.instance.m_smoothDayFraction;
+    public static float SmoothDayFraction => EnvMan.instance.m_smoothDayFraction;
     public static int CurrentDay => EnvMan.instance.GetCurrentDay();
 
     public static string GetTimeFormat(string? originalText)
@@ -52,12 +53,13 @@ public static class TimeExtensions
         var minute = (int)((SmoothDayFraction * 24f - hour) * 60f);
         var second = (int)(((SmoothDayFraction * 24f - hour) * 60f - minute) * 60f);
 
-        var now = DateTime.Now;
-        var dateTimeNow = new DateTime(now.Year, now.Month, now.Day, hour, minute, second);
-        return dateTimeNow;
+        var time = new TimeSpan(hour, minute, second);
+        var date = DateTime.MinValue.AddDays(EnvMan.instance.GetCurrentDay());
+
+        return date.Add(time);
     }
 
-    public static DateTime LocalNow(TimeZoneInfo? timeZone)
+    public static DateTime LocalNow(TimeZoneInfo? timeZone = null)
     {
         timeZone ??= TimeZoneInfo.Local;
         var localNow = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);

@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using jcdcdev.Valheim.Core.Extensions;
 using Jotunn;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -11,8 +13,15 @@ public abstract class SimpleRPC : ISimpleRPC
 
     public void Send(long peerId, ZPackage pkg)
     {
-        Logger.LogDebug($"\n\nRPC SENT - {_rpc.Name}\n\nRecipient: {peerId}\n");
-        _rpc.SendPackage(peerId, pkg);
+        try
+        {
+            Logger.LogDebug($"\n\nRPC SENT - {_rpc.Name}\n\nRecipient: {peerId}\n");
+            _rpc.SendPackage(peerId, pkg);
+        }
+        catch (Exception ex)
+        {
+            LoggerExtensions.LogIssue(ex, $"Error sending RPC {_rpc.Name}");
+        }
     }
 
     public void Send(long peerId, string? message) => Send(peerId, CreatePackage(message));

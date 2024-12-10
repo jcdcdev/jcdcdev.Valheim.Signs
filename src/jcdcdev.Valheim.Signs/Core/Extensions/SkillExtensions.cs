@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace jcdcdev.Valheim.Core.Extensions;
+﻿namespace jcdcdev.Valheim.Core.Extensions;
 
 public static class SkillExtensions
 {

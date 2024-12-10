@@ -7,6 +7,12 @@ namespace jcdcdev.Valheim.Signs.Models;
 
 public class PlayerDeathLeaderBoard
 {
+    public static PlayerDeathLeaderBoard Empty => new()
+    {
+        Updated = DateTime.MinValue,
+        Players = new List<PlayerDeathInfo>()
+    };
+
     public List<PlayerDeathInfo> Players { get; set; } = new();
     public DateTime Updated { get; set; }
 

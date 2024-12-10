@@ -1,0 +1,36 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jcdcdev.Valheim.Signs", "jcdcdev.Valheim.Signs/jcdcdev.Valheim.Signs.csproj", "{5BCC8C83-3A3F-48B7-B860-5ACAF937588D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{650D3E62-A5FF-467F-8460-8604CE8837C4}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\CONTRIBUTING.md = ..\.github\CONTRIBUTING.md
+		..\.github\ISSUE_TEMPLATE\bug.yml = ..\.github\ISSUE_TEMPLATE\bug.yml
+		..\.github\ISSUE_TEMPLATE\config.yml = ..\.github\ISSUE_TEMPLATE\config.yml
+		..\.github\ISSUE_TEMPLATE\feature_request.yml = ..\.github\ISSUE_TEMPLATE\feature_request.yml
+		..\.github\workflows\auto-assign.yml = ..\.github\workflows\auto-assign.yml
+		..\.github\workflows\build-template.yml = ..\.github\workflows\build-template.yml
+		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
+		..\.github\workflows\release-template.yml = ..\.github\workflows\release-template.yml
+		..\.github\workflows\release.yml = ..\.github\workflows\release.yml
+		..\.github\workflows\update-packages.yml = ..\.github\workflows\update-packages.yml
+		..\.github\workflows\update-releases.yml = ..\.github\workflows\update-releases.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5BCC8C83-3A3F-48B7-B860-5ACAF937588D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BCC8C83-3A3F-48B7-B860-5ACAF937588D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BCC8C83-3A3F-48B7-B860-5ACAF937588D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BCC8C83-3A3F-48B7-B860-5ACAF937588D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ED5888BF-6E52-4478-8C95-CC7EA0DD7C31}
+	EndGlobalSection
+EndGlobal

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +7,7 @@ using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Bootstrap;
 using jcdcdev.Valheim.Core;
+using jcdcdev.Valheim.Core.Extensions;
 using jcdcdev.Valheim.Core.RPC;
 using jcdcdev.Valheim.Signs.Converters;
 using jcdcdev.Valheim.Signs.Extensions;
@@ -44,15 +44,12 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
     private void EnsureLeaderboardFileExists()
     {
-        if (!File.Exists(LeaderboardPath))
+        if (File.Exists(LeaderboardPath))
         {
-            var model = new PlayerDeathLeaderBoard
-            {
-                Players = new List<PlayerDeathInfo>(),
-                Updated = DateTime.MinValue
-            };
-            WriteJsonToFile(model, LeaderboardPath);
+            return;
         }
+
+        WriteJsonToFile(PlayerDeathLeaderBoard.Empty, LeaderboardPath);
     }
 
     private void AddSigns()
@@ -91,14 +88,14 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         var converter = DynamicSigns.FirstOrDefault(x => x.CanConvert(sign, input));
         if (converter == null)
         {
-            Logger.LogWarning($"No converter found for {input}");
+            Logger.LogDebug($"No converter found for {input}");
             return false;
         }
 
         var result = converter.GetSignText(sign, input);
         if (result == null || result.IsNullOrWhiteSpace())
         {
-            Logger.LogWarning("No result found.");
+            Logger.LogDebug("No result found.");
             return false;
         }
 
@@ -109,35 +106,52 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     public bool Client_GetSignText(Sign sign, string signText, out string output)
     {
         output = signText;
-        var originalValues = Client_GetTokenValue(signText);
-        foreach (var originalValue in originalValues)
+
+        try
         {
-            if (!TryGetSignText(sign, originalValue, out var result) || result == null)
+            var originalValues = Client_GetTokenValue(signText);
+            foreach (var originalValue in originalValues)
             {
-                continue;
+                if (!TryGetSignText(sign, originalValue, out var result) || result == null)
+                {
+                    continue;
+                }
+
+                output = output.Replace("{{" + originalValue + "}}", result);
             }
 
-            output = output.Replace("{{" + originalValue + "}}", result);
+            return output != signText;
         }
-
-        return output != signText;
+        catch (Exception ex)
+        {
+            Logger.LogIssue(ex, "Error getting sign text");
+            return false;
+        }
     }
 
-    private static IEnumerable<string> Client_GetTokenValue(string originalText)
+    private IEnumerable<string> Client_GetTokenValue(string originalText)
     {
-        var match = Constants.HandlebarRegexPattern.Matches(originalText);
-        if (match.Count == 0)
+        try
         {
+            var match = Constants.HandlebarRegexPattern.Matches(originalText);
+            if (match.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            var output = new List<string>();
+            foreach (Match item in match)
+            {
+                output.Add(item.Groups[1].Value);
+            }
+
+            return output;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogIssue(ex, "Error getting sign token values");
             return new List<string>();
         }
-
-        var output = new List<string>();
-        foreach (Match item in match)
-        {
-            output.Add(item.Groups[1].Value);
-        }
-
-        return output;
     }
 
     public bool Client_GetSignHoverText(Sign sign, string originalText, out string output)
@@ -179,14 +193,14 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         var converter = DynamicSigns.FirstOrDefault(x => x.CanConvert(sign, originalValue));
         if (converter == null)
         {
-            Logger.LogWarning("No converter found.");
+            Logger.LogDebug("No converter found.");
             return false;
         }
 
         var result = converter.GetSignHoverText(sign, originalValue);
         if (result == null || result.IsNullOrWhiteSpace())
         {
-            Logger.LogWarning("No hover text found.");
+            Logger.LogDebug("No hover text found.");
             return false;
         }
 
@@ -223,7 +237,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex);
+            Logger.LogIssue(ex, "Error getting death leaderboard");
             return null;
         }
     }
@@ -249,36 +263,43 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
     public void Server_UpdateDeath(PlayerDeathInfo data)
     {
-        var path = LeaderboardPath;
-        var model = ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
-        if (model == null)
+        try
         {
-            Logger.LogWarning("Death Leaderboard file not found.");
-            return;
-        }
-
-        var player = model.Players.FirstOrDefault(x => x.Id == data.Id);
-        if (player == null)
-        {
-            Logger.LogWarning("Player not found in leaderboard.");
-            model.Players.Add(data);
-        }
-        else
-        {
-            if (player.Deaths == data.Deaths)
+            var path = LeaderboardPath;
+            var model = ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
+            if (model == null)
             {
-                Logger.LogDebug("Player death count is the same. No update needed.");
+                Logger.LogWarning("Death Leaderboard file not found.");
                 return;
             }
 
-            Logger.LogInfo($"Updating Death Count - {player.Name}: {player.Deaths} => {data.Deaths}");
-            player.Deaths = data.Deaths;
-        }
+            var player = model.Players.FirstOrDefault(x => x.Id == data.Id);
+            if (player == null)
+            {
+                Logger.LogWarning("Player not found in leaderboard.");
+                model.Players.Add(data);
+            }
+            else
+            {
+                if (player.Deaths == data.Deaths)
+                {
+                    Logger.LogDebug("Player death count is the same. No update needed.");
+                    return;
+                }
 
-        model.Players = model.Players.OrderByDescending(x => x.Deaths).ToList();
-        model.Updated = DateTime.UtcNow;
-        DeathLeaderboardUpdateResponse.SendAll(model);
-        WriteJsonToFile(model, path);
+                Logger.LogInfo($"Updating Death Count - {player.Name}: {player.Deaths} => {data.Deaths}");
+                player.Deaths = data.Deaths;
+            }
+
+            model.Players = model.Players.OrderByDescending(x => x.Deaths).ToList();
+            model.Updated = DateTime.UtcNow;
+            DeathLeaderboardUpdateResponse.SendAll(model);
+            WriteJsonToFile(model, path);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogIssue(ex, "Error updating death leaderboard");
+        }
     }
 
     public void Client_SendDeathUpdateRequest(Player player)
