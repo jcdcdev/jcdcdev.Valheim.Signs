@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{650D3E
 		..\.github\workflows\release.yml = ..\.github\workflows\release.yml
 		..\.github\workflows\update-packages.yml = ..\.github\workflows\update-packages.yml
 		..\.github\workflows\update-releases.yml = ..\.github\workflows\update-releases.yml
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Global

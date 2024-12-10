@@ -151,6 +151,20 @@ Displays the current day percentage.
 
 ![In game screenshot of the Day Percentage sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/day-percent.png)
 
+### Night Countdown
+
+Displays the (real) time in minutes until the night.
+
+`{{nightCountdown}}`
+
+![In game screenshot of the Night Countdown sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/night-countdown.png)
+
+#### Options
+
+| Option  | Description                | Example                | Example Output |
+|---------|----------------------------|------------------------|----------------|
+| `s`     | Adds seconds to the time   | `{{nightCountdown s}}` | `02:12`        |
+
 ## Installation
 
 This mod **must** be installed on the server and all clients to work.
