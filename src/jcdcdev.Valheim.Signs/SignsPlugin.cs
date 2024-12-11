@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Bootstrap;
+using BepInEx.Configuration;
 using jcdcdev.Valheim.Core;
 using jcdcdev.Valheim.Core.Extensions;
 using jcdcdev.Valheim.Core.RPC;
@@ -15,6 +16,7 @@ using jcdcdev.Valheim.Signs.Models;
 using jcdcdev.Valheim.Signs.RPC;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using UnityEngine;
 
 namespace jcdcdev.Valheim.Signs;
 
@@ -28,15 +30,21 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     public readonly ISimpleRPC DeathLeaderboardUpdateRequest = new DeathLeaderboardUpdateRequest();
     public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
     public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
+    private readonly Dictionary<int, SmelterDto> _smelters = new();
     private string LeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
     protected override string PluginId => Constants.PluginId;
+
+    public ConfigEntry<int> SmelterRadius = null!;
 
     protected override void OnAwake()
     {
         DeathUpdate.Initialise(NetworkManager.Instance);
         DeathLeaderboardUpdateRequest.Initialise(NetworkManager.Instance);
         DeathLeaderboardUpdateResponse.Initialise(NetworkManager.Instance);
+
+        SmelterRadius = Config
+            .Bind("Smelter", "Radius", 10, new ConfigDescription("The radius to search for smelters", null, new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
         AddSigns();
         EnsureLeaderboardFileExists();
@@ -312,4 +320,75 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
         DeathUpdate.SendToServer(player.GetDeathInfo());
     }
+
+    public SmelterDto? Client_GetClosestSmelter(Vector3 position)
+    {
+        if (!ZNet.instance.IsLocalOrClient())
+        {
+            Logger.LogError("GetClosestSmelter called on server.");
+            return null;
+        }
+
+        var smelter = _smelters.Values.OrderBy(x => Vector3.Distance(position, x.Position)).FirstOrDefault();
+        if (smelter == null)
+        {
+            Logger.LogDebug("Smelter not found.");
+            return null;
+        }
+
+        var distance = Vector3.Distance(position, smelter.Position);
+        Logger.LogDebug($"Closest Smelter: {distance} - {smelter.Id}");
+        if (distance > SmelterRadius.Value)
+        {
+            Logger.LogDebug("Smelter is too far away.");
+            return null;
+        }
+
+        return smelter;
+    }
+
+    public List<SmelterDto> Client_GetAllSmelters()
+    {
+        if (!ZNet.instance.IsLocalOrClient())
+        {
+            Logger.LogWarning("GetSmelters called on server.");
+            return new List<SmelterDto>();
+        }
+
+        return _smelters.Values.ToList();
+    }
+
+    public void Client_AddSmelter(Smelter smelter)
+    {
+        if (!ZNet.instance.IsLocalOrClient())
+        {
+            Logger.LogWarning("AddSmelter called on server.");
+            return;
+        }
+
+        var id = smelter.GetInstanceID();
+        if (_smelters.ContainsKey(id))
+        {
+            Logger.LogWarning("Smelter already exists.");
+            return;
+        }
+
+        var dto = new SmelterDto
+        {
+            Id = id,
+            X = smelter.transform.position.x,
+            Y = smelter.transform.position.y,
+            Z = smelter.transform.position.z
+        };
+        _smelters.Add(id, dto);
+    }
+}
+
+public class SmelterDto
+{
+    public int Id { get; set; }
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Z { get; set; }
+    public Vector3 Position => new(X, Y, Z);
 }

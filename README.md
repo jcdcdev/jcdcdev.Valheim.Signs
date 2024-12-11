@@ -161,9 +161,25 @@ Displays the (real) time in minutes until the night.
 
 #### Options
 
-| Option  | Description                | Example                | Example Output |
-|---------|----------------------------|------------------------|----------------|
-| `s`     | Adds seconds to the time   | `{{nightCountdown s}}` | `02:12`        |
+| Option | Description              | Example                | Example Output |
+|--------|--------------------------|------------------------|----------------|
+| `s`    | Adds seconds to the time | `{{nightCountdown s}}` | `02:12`        |
+
+### Smelter/Eitr Content
+
+Displays the contents of the nearest smelter or eitr.
+
+`{{smelterContent}}`
+
+![In game screenshot of the Smelter Content sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/smelter.png)
+
+#### Options
+
+| Option | Description        | Example                | Example Output |
+|--------|--------------------|------------------------|----------------|
+| `l`    | Removes the label  | `{{smelterContent l}}` | `10`<br>`5`    |
+| `f`    | Only displays fuel | `{{smelterContent f}}` | `WOOD: 10`     |
+| `o`    | Only displays ore  | `{{smelterContent o}}` | `COPPER: 5`    |
 
 ## Installation
 
