@@ -12,7 +12,7 @@ name: 🔃 Update NuGet Dependencies
 
 env:
   PACKAGE_ID: JotunnLib
-  PROJECT_PATH: ${{ github.workspace }}/src/jcdcdev.Valheim.Signs.csproj
+  PROJECT_PATH: ${{ github.workspace }}/src/jcdcdev.Valheim.Signs/jcdcdev.Valheim.Signs.csproj
 
 jobs:
   update-packages:
