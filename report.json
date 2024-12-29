@@ -2,15 +2,15 @@
   "Projects": [
     {
       "Name": "jcdcdev.Valheim.Signs",
-      "FilePath": "D:\\a\\jcdcdev.Valheim.Signs\\jcdcdev.Valheim.Signs\\src\\jcdcdev.Valheim.Signs.csproj",
+      "FilePath": "D:\\a\\jcdcdev.Valheim.Signs\\jcdcdev.Valheim.Signs\\src\\jcdcdev.Valheim.Signs\\jcdcdev.Valheim.Signs.csproj",
       "TargetFrameworks": [
         {
           "Name": ".NETFramework,Version=v4.6.2",
           "Dependencies": [
             {
               "Name": "JotunnLib",
-              "ResolvedVersion": "2.21.3",
-              "LatestVersion": "2.22.0",
+              "ResolvedVersion": "2.22.0",
+              "LatestVersion": "2.23.0",
               "UpgradeSeverity": "Minor"
             }
           ]
