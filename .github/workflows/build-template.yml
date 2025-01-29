@@ -29,6 +29,7 @@ on:
 
 env:
     PROJECT_PATH: ${{ github.workspace }}/src/${{ inputs.project-name }}/${{ inputs.project-name }}.csproj
+    JOTUNN_PATH: ${{ github.workspace }}/src/JotunnBuildTask/JotunnBuildTask.csproj
     BUILD_OUTPUT: ${{ github.workspace }}/build-output/
     MOD_OUTPUT: ${{ github.workspace }}/build-output/${{ inputs.project-name }}.dll
     ARTIFACT_PATH: ${{ github.workspace }}/mod/
@@ -178,6 +179,7 @@ jobs:
 
             -   name: Restore Packages
                 run: |
+                    nuget restore ${{ env.JOTUNN_PATH }}
                     nuget restore ${{ env.PROJECT_PATH }}
 
             -   name: Set version file
