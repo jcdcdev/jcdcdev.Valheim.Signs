@@ -18,4 +18,8 @@
         <Reference Include="Microsoft.CSharp" />
         <Reference Include="System.Data.DataSetExtensions" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\JotunnBuildTask\JotunnBuildTask.csproj" />
+    </ItemGroup>
 </Project>
