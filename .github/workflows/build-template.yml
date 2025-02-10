@@ -63,7 +63,7 @@ jobs:
                 run: |
                     $results = dotnet-gitversion --roll-forward Major -output json -l console -config GitVersion.yml
                     echo $results
-                    $semVer = $results.SemVer
+                    $semVer = "$results" | ConvertFrom-Json | Select-Object -ExpandProperty SemVer
                     echo "semver = $semVer"
                     echo "semVer=$semVer" >> $GITHUB_OUTPUT
             -   name: Get Valheim version id
