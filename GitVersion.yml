@@ -1,6 +1,5 @@
-workflow: TrunkBased/preview1
-strategies:
-  - Mainline
+workflow: GitHubFlow/v1
+mode: ContinuousDelivery
 branches:
   update:
     regex: ^update\/.*$
