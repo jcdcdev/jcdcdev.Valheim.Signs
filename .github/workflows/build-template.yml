@@ -61,9 +61,9 @@ jobs:
                 #   useConfigFile: true
                 shell: pwsh
                 run: |
-                    $results = dotnet-gitversion --roll-forward Major -output json -l console -config GitVersion.yml
-                    echo $results
-                    $semVer = $results | ConvertFrom-Json | Select-Object -ExpandProperty SemVer
+                    dotnet-gitversion --roll-forward Major -output buildserver -l console -config GitVersion.yml
+                    echo $GitVersion
+                    $semVer = $GitVersion.SemVer
                     echo "semver = $semVer"
                     echo "semVer=$semVer" >> $GITHUB_OUTPUT
             -   name: Get Valheim version id
