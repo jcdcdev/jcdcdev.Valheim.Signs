@@ -59,6 +59,7 @@ jobs:
                 # uses: gittools/actions/gitversion/execute@v3.1.11
                 # with:
                 #   useConfigFile: true
+                shell: pwsh
                 run: |
                     $results = dotnet-gitversion --roll-forward Major -output json -l console -config GitVersion.yml
                     echo $results
