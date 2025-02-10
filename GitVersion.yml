@@ -3,4 +3,4 @@ mode: ContinuousDelivery
 branches:
   update:
     regex: ^update\/.*$
-    tag: alpha
+    label: alpha
