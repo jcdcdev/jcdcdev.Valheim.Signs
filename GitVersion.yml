@@ -4,3 +4,12 @@ branches:
   update:
     regex: ^update\/.*$
     label: alpha
+  pull-request:
+    regex: (pull|pull\-requests|pr)[/-]
+    mode: ContinuousDelivery
+    label: pr
+    increment: Inherit
+    label-number-pattern: '[/-](?<number>\d+)[-/]'
+    track-merge-target: false
+    tracks-release-branches: false
+    is-release-branch: false
