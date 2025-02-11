@@ -1,0 +1,14 @@
+workflow: GitHubFlow/v1
+mode: ContinuousDelivery
+branches:
+  update:
+    regex: ^update\/.*$
+    label: alpha
+  pull-request:
+    regex: (pull|pull\-requests|pr)[/-]
+    mode: ContinuousDelivery
+    label: pr
+    increment: Inherit
+    track-merge-target: false
+    tracks-release-branches: false
+    is-release-branch: false

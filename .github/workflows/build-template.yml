@@ -51,12 +51,21 @@ jobs:
                 with:
                     fetch-depth: 0
             -   name: Install GitVersion
-                uses: gittools/actions/gitversion/setup@v0
+                uses: gittools/actions/gitversion/setup@v3.1.11
                 with:
-                    versionSpec: '5.x'
+                    versionSpec: '6.0.x'
             -   name: Determine Version
                 id: gitversion
-                uses: gittools/actions/gitversion/execute@v0
+                # uses: gittools/actions/gitversion/execute@v3.1.11
+                # with:
+                #   useConfigFile: true
+                shell: pwsh
+                run: |
+                    $results = dotnet-gitversion --roll-forward Major -output json -config GitVersion.yml
+                    echo $results
+                    $semVer = "$results" | ConvertFrom-Json | Select-Object -ExpandProperty AssemblySemFileVer
+                    echo "semver = $semVer"
+                    echo "semVer=$semVer" >> $env:GITHUB_OUTPUT
             -   name: Get Valheim version id
                 id: valheim-version
                 run: |
