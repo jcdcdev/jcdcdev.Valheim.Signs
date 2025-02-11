@@ -8,6 +8,7 @@ branches:
     regex: (pull|pull\-requests|pr)[/-]
     mode: ContinuousDelivery
     label: pr
+    label-number-pattern: ""
     increment: Inherit
     track-merge-target: false
     tracks-release-branches: false
