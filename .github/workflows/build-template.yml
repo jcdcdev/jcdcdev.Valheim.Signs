@@ -65,7 +65,7 @@ jobs:
                     echo $results
                     $semVer = "$results" | ConvertFrom-Json | Select-Object -ExpandProperty SemVer
                     echo "semver = $semVer"
-                    echo "semVer=$semVer" >> $GITHUB_OUTPUT
+                    echo "semVer=$semVer" >> $env:GITHUB_OUTPUT
             -   name: Get Valheim version id
                 id: valheim-version
                 run: |
