@@ -9,7 +9,6 @@ branches:
     mode: ContinuousDelivery
     label: pr
     increment: Inherit
-    label-number-pattern: '[/-](?<number>\d+)[-/]'
     track-merge-target: false
     tracks-release-branches: false
     is-release-branch: false
