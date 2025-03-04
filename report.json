@@ -9,9 +9,9 @@
           "Dependencies": [
             {
               "Name": "JotunnLib",
-              "ResolvedVersion": "2.23.1",
-              "LatestVersion": "2.23.2",
-              "UpgradeSeverity": "Patch"
+              "ResolvedVersion": "2.23.2",
+              "LatestVersion": "2.24.1",
+              "UpgradeSeverity": "Minor"
             }
           ]
         }
@@ -27,8 +27,8 @@
             {
               "Name": "Microsoft.Build.Utilities.Core",
               "ResolvedVersion": "17.12.6",
-              "LatestVersion": "17.12.6",
-              "UpgradeSeverity": "None"
+              "LatestVersion": "17.13.9",
+              "UpgradeSeverity": "Minor"
             }
           ]
         }

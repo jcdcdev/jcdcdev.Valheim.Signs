@@ -18,6 +18,7 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/build-template.yml
     with:
       project-name: jcdcdev.Valheim.Signs

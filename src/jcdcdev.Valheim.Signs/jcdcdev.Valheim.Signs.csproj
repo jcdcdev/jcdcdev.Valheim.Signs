@@ -6,20 +6,16 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <AssemblyTitle>jcdcdev.Valheim.Signs</AssemblyTitle>
         <Product>jcdcdev.Valheim.Signs</Product>
-        <Copyright>Copyright © James Carter 2024</Copyright>
+        <Copyright>Copyright © James Carter 2025</Copyright>
         <DebugType>pdbonly</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JotunnLib" Version="2.23.2" />
+        <PackageReference Include="JotunnLib" Version="2.24.1"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data.DataSetExtensions" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\JotunnBuildTask\JotunnBuildTask.csproj" />
+        <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="System.Data.DataSetExtensions"/>
     </ItemGroup>
 </Project>
