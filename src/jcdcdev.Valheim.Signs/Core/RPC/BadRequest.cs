@@ -27,7 +27,6 @@ public class BadRequest : SimpleRPC
         }
 
         Logger.LogWarning($"BadRequest called: {msg}");
-        Chat.instance.AddString("Server", "<color=\"red\">" + msg + "</color>", Talker.Type.Normal);
     }
 
     public override IEnumerator Server(long sender, ZPackage? pkg) => Noop(sender, pkg);
