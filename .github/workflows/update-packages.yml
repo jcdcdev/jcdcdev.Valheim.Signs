@@ -55,7 +55,7 @@ jobs:
         if: steps.run-dotnet-outdated.outputs.updateFound == 'true' && github.event.inputs.dry-run != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.JCDC_BOT_TOKEN }}
           commit-message: "feature: Support ${{ env.PACKAGE_ID }} ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
           title: "Update ${{ env.PACKAGE_ID }} from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}"
           body: "This PR updates the ${{ env.PACKAGE_ID }} NuGet package from ${{ steps.run-dotnet-outdated.outputs.currentVersion }} to ${{ steps.run-dotnet-outdated.outputs.latestVersion }}."
