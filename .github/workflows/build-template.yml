@@ -116,7 +116,7 @@ jobs:
                       echo EOF
                     } >> "$GITHUB_OUTPUT"
     build:
-        name: build ${{ needs.determine-version.outputs.mod-version }}
+        name: build
         runs-on: windows-latest
         needs:
             - determine-version
