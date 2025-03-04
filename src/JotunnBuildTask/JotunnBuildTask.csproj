@@ -21,7 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>17.12.6</Version>
+      <Version>17.13.9</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Update="@(PackageReference)" PrivateAssets="All" />
