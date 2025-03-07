@@ -9,26 +9,9 @@
           "Dependencies": [
             {
               "Name": "JotunnLib",
-              "ResolvedVersion": "2.23.2",
-              "LatestVersion": "2.24.1",
-              "UpgradeSeverity": "Minor"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "Name": "JotunnBuildTask",
-      "FilePath": "D:\\a\\jcdcdev.Valheim.Signs\\jcdcdev.Valheim.Signs\\src\\JotunnBuildTask\\JotunnBuildTask.csproj",
-      "TargetFrameworks": [
-        {
-          "Name": ".NETFramework,Version=v4.6.2",
-          "Dependencies": [
-            {
-              "Name": "Microsoft.Build.Utilities.Core",
-              "ResolvedVersion": "17.12.6",
-              "LatestVersion": "17.13.9",
-              "UpgradeSeverity": "Minor"
+              "ResolvedVersion": "2.24.1",
+              "LatestVersion": "2.24.2",
+              "UpgradeSeverity": "Patch"
             }
           ]
         }
