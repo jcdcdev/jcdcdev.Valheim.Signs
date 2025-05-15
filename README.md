@@ -71,7 +71,7 @@ Displays the current health level of the player.
 
 ## Skills
 
-Displays the skill level of the player.
+Displays the skill level of a player.
 
 `{{skill bows}}`
 
@@ -103,10 +103,11 @@ Displays the skill level of the player.
 
 #### Options
 
-| Option  | Description   | Example                | Example Output |
-|---------|---------------|------------------------|----------------|
-| `emoji` | Adds an emoji | `{{skill bows emoji}}` | `🏹 100`       |
-| `label` | Adds a label  | `{{skill bows label}}` | `Bows 100`     |
+| Option     | Description                                                               | Example                | Example Output |
+|------------|---------------------------------------------------------------------------|------------------------|----------------|
+| `emoji`    | Adds an emoji                                                             | `{{skill bows emoji}}` | `🏹 100`       |
+| `label`    | Adds a label                                                              | `{{skill bows label}}` | `Bows 100`     |
+| `playerId` | The player's name or ID.<br/>Defaults to the current player if left blank | `{{skill bows jcdc}}`  | `100`          |
 
 ### Game Time
 

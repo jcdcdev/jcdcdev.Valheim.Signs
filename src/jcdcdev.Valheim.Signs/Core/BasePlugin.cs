@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -17,7 +18,6 @@ namespace jcdcdev.Valheim.Core;
 public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : class
 {
     private static TPlugin? _instance;
-    private readonly IDictionary<string, object?> _cache = new Dictionary<string, object?>();
     public readonly ISimpleRPC BadRequest = new BadRequest();
 
     public new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("Signs");
@@ -60,21 +60,51 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         }
     }
 
-    public void AddCacheItem(string key, object? value) => _cache[key] = value;
+    private readonly IDictionary<string, CacheEntry> _cache = new ConcurrentDictionary<string, CacheEntry>();
 
-    protected TItem? GetCacheItem<TItem>(string key) where TItem : class
+    private record CacheEntry(object? Value, DateTime ExpiryTime)
     {
-        if (!_cache.TryGetValue(key, out var value))
+        public object? Value { get; } = Value;
+        public DateTime ExpiryTime { get; } = ExpiryTime;
+    }
+
+    public void AddCacheItem<TItem>(string key, TItem? value, TimeSpan? expiry = null) where TItem : class
+    {
+        var entry = new CacheEntry(value, expiry.HasValue ? DateTime.UtcNow.Add(expiry.Value) : DateTime.MaxValue);
+        Logger.LogDebug($"Cache entry added for key: {key}, value: {value}, expiry: {entry.ExpiryTime}");
+        _cache[key] = entry;
+    }
+
+    public bool TryGetCacheItem<TItem>(string key, out TItem? item) where TItem : class
+    {
+        item = null;
+        var result = GetCacheItem<TItem>(key);
+        if (result == null)
         {
+            return false;
+        }
+
+        item = result;
+        return true;
+    }
+
+    public TItem? GetCacheItem<TItem>(string key) where TItem : class
+    {
+        if (!_cache.TryGetValue(key, out var entry))
+        {
+            Logger.LogDebug($"No cache entry found for key: {key}");
             return null;
         }
 
-        if (value is TItem result)
+        if (entry.ExpiryTime <= DateTime.UtcNow)
         {
-            return result;
+            Logger.LogDebug($"Cache entry for key: {key} has expired");
+            _cache.Remove(key);
+            return null;
         }
 
-        return null;
+        Logger.LogDebug($"Cache entry for key: {key} is valid\nexpiry {entry.ExpiryTime}\nvalue: {entry.Value}");
+        return entry.Value as TItem;
     }
 
     protected virtual void OnAwake() { }
