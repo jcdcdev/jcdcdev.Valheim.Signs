@@ -99,7 +99,6 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         {
             var contents = JsonHelper.ToJson(model);
             File.WriteAllText(path, contents);
-            throw new Exception("Test Error");
         }
         catch (Exception ex)
         {
