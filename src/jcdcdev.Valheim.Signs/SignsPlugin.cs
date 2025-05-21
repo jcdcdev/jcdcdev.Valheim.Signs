@@ -14,9 +14,11 @@ using jcdcdev.Valheim.Signs.Converters;
 using jcdcdev.Valheim.Signs.Extensions;
 using jcdcdev.Valheim.Signs.Models;
 using jcdcdev.Valheim.Signs.RPC;
+using Jotunn;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace jcdcdev.Valheim.Signs;
 
@@ -30,12 +32,13 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     public readonly ISimpleRPC DeathLeaderboardUpdateRequest = new DeathLeaderboardUpdateRequest();
     public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
     public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
-    private readonly Dictionary<int, SmelterDto> _smelters = new();
+    private readonly Dictionary<int, GameObjectDto> _smelters = new();
     private string LeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
     protected override string PluginId => Constants.PluginId;
-
+    public ConfigEntry<int> ItemsCacheExpireTime = null!;
     public ConfigEntry<int> SmelterRadius = null!;
+    public ConfigEntry<int> ItemsMaxRadius = null!;
 
     protected override void OnAwake()
     {
@@ -43,9 +46,11 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         DeathLeaderboardUpdateRequest.Initialise(NetworkManager.Instance);
         DeathLeaderboardUpdateResponse.Initialise(NetworkManager.Instance);
 
-        SmelterRadius = Config
-            .Bind("Smelter", "Radius", 10, new ConfigDescription("The radius to search for smelters", null, new ConfigurationManagerAttributes { IsAdminOnly = true }));
+        var adminOnly = new ConfigurationManagerAttributes { IsAdminOnly = true };
+        SmelterRadius = Config.Bind("Smelter", "Radius", 10, new ConfigDescription("The radius to search for smelters", null, adminOnly));
+        ItemsMaxRadius = Config.Bind("Items", "MaxRadius", 128, new ConfigDescription("The maximum radius users can configure to search for items", null, adminOnly));
 
+        ItemsCacheExpireTime = Config.Bind("Items", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache item counts", null, adminOnly));
         AddSigns();
         EnsureLeaderboardFileExists();
     }
@@ -183,8 +188,16 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             return false;
         }
 
-        var hover = $"[<color=\"yellow\">DYNAMIC</color>] {string.Join(" ", values)}";
-        output = Constants.HoverTextRegexPattern.Replace(originalText, $"{hover}");
+        var hover = $"[<color=\"yellow\">DYNAMIC</color>] {string.Join(" ", values)}\n<i>{originalText}</i>\n[<color=\"yellow\">E</color>] Use";
+        if (IsAzuSignsInstalled)
+        {
+            output = Constants.HoverTextRegexPattern.Replace(originalText, $"{hover}");
+        }
+        else
+        {
+            output = hover;
+        }
+
         Logger.LogDebug($"Sign Hover: {output}");
         return output != originalText;
     }
@@ -295,7 +308,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
                     return;
                 }
 
-                Logger.LogInfo($"Updating Death Count - {player.Name}: {player.Deaths} => {data.Deaths}");
+                Logger.LogInfo($"Updating Death Count - {player.Name} ({player.Id}): {player.Deaths} => {data.Deaths}");
                 player.Deaths = data.Deaths;
             }
 
@@ -321,7 +334,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         DeathUpdate.SendToServer(player.GetDeathInfo());
     }
 
-    public SmelterDto? Client_GetClosestSmelter(Vector3 position)
+    public GameObjectDto? Client_GetClosestSmelter(Vector3 position)
     {
         if (!ZNet.instance.IsLocalOrClient())
         {
@@ -347,12 +360,12 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         return smelter;
     }
 
-    public List<SmelterDto> Client_GetAllSmelters()
+    public List<GameObjectDto> Client_GetAllSmelters()
     {
         if (!ZNet.instance.IsLocalOrClient())
         {
             Logger.LogWarning("GetSmelters called on server.");
-            return new List<SmelterDto>();
+            return new List<GameObjectDto>();
         }
 
         return _smelters.Values.ToList();
@@ -373,7 +386,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             return;
         }
 
-        var dto = new SmelterDto
+        var dto = new GameObjectDto
         {
             Id = id,
             X = smelter.transform.position.x,
@@ -382,13 +395,4 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         };
         _smelters.Add(id, dto);
     }
-}
-
-public class SmelterDto
-{
-    public int Id { get; set; }
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
-    public Vector3 Position => new(X, Y, Z);
 }

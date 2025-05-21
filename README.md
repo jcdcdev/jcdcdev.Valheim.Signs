@@ -13,6 +13,20 @@ signs!
 
 Simply place any sign and set the text to one of the following options, e.g `{{onlineCount}}`.
 
+- [Online Count](#online-count)
+- [Death Count](#death-count)
+- [Death Leaderboard](#death-leaderboard)
+- [Comfort](#comfort)
+- [Stamina](#stamina)
+- [Health](#health)
+- [Skills](#skills)
+- [Game Time](#game-time)
+- [Actual Time](#actual-time)
+- [Day Percentage](#day-percentage)
+- [Night Countdown](#night-countdown)
+- [Smelter/Eitr Content](#smeltereitr-content)
+- [Storage Content](#storage-content)
+
 ### Online Count
 
 Displays the current number of players online.
@@ -181,6 +195,24 @@ Displays the contents of the nearest smelter or eitr.
 | `l`    | Removes the label  | `{{smelterContent l}}` | `10`<br>`5`    |
 | `f`    | Only displays fuel | `{{smelterContent f}}` | `WOOD: 10`     |
 | `o`    | Only displays ore  | `{{smelterContent o}}` | `COPPER: 5`    |
+
+### Storage Content
+
+Displays the contents of storage such as chests.
+
+`{{items}}`
+
+![In game screenshot of the Storage Content sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/storage.png)
+
+#### Options
+
+| Option          | Description                                                                                                            | Example               | Example Output              |
+|-----------------|------------------------------------------------------------------------------------------------------------------------|-----------------------|-----------------------------|
+| `s`             | Displays number of stacks                                                                                              | `{{items s}}`         | `WOOD: 3`<br>`IRON: 1`      |
+| `l`             | Removes the label                                                                                                      | `{{items l}}`         | `10`<br>`5`                 |
+| `t`             | Counts all items across all valid storage objects (supports name filters & search radius)                              | `{{items total}}`     | `COPPER: 10`                |
+| `search_radius` | The search radius for the sign to find storage objects<br/>Defaults to the nearest storage object if left blank or < 1 | `{{items iron 5}}`    | `IRON: 10`                  |
+| `item_name`     | Only displays the specified item name (supports multiple names)                                                        | `{{items wood iron}}` | `WOOD: 150` <br> `IRON: 20` |
 
 ## Installation
 
