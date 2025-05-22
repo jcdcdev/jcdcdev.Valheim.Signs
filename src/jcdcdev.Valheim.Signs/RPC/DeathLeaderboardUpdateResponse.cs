@@ -33,7 +33,7 @@ public class DeathLeaderboardUpdateResponse : SimpleRPC
                 yield break;
             }
 
-            SignsPlugin.Instance.AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model);
+            SignsPlugin.Instance.Client_UpdateDeathLeaderboard(model);
         }
         catch (Exception ex)
         {

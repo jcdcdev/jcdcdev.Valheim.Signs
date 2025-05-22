@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using jcdcdev.Valheim.Core.Extensions;
-using Jotunn;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

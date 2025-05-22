@@ -88,7 +88,7 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         return true;
     }
 
-    public TItem? GetCacheItem<TItem>(string key) where TItem : class
+    public TItem? GetCacheItem<TItem>(string key, bool returnExpired = false) where TItem : class
     {
         if (!_cache.TryGetValue(key, out var entry))
         {
@@ -100,7 +100,7 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         {
             Logger.LogDebug($"Cache entry for key: {key} has expired");
             _cache.Remove(key);
-            return null;
+            return returnExpired ? entry.Value as TItem : null;
         }
 
         Logger.LogDebug($"Cache entry for key: {key} is valid\nexpiry {entry.ExpiryTime}\nvalue: {entry.Value}");
@@ -109,19 +109,6 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
 
     protected virtual void OnAwake() { }
 
-    protected T? ReadJsonFromFile<T>(string path) where T : class
-    {
-        try
-        {
-            var contents = File.ReadAllText(path);
-            return JsonHelper.FromJson<T>(contents);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogIssue(ex, $"Error reading {typeof(T).Name} from file");
-            return null;
-        }
-    }
 
     protected void WriteJsonToFile(object model, string path)
     {
