@@ -1,17 +1,20 @@
-﻿using jcdcdev.Valheim.Core.Extensions;
+﻿namespace jcdcdev.Valheim.Signs.Converters;
 
-namespace jcdcdev.Valheim.Signs.Converters;
-
-public class PlayerHealthSign : IAmADynamicSign
+public class PlayerHealthSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.InvariantEquals("health");
+    protected override string Tag => "health";
 
-    public string? GetSignText(Sign sign, string input)
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var health = Player.m_localPlayer.GetHealth();
         var max = Player.m_localPlayer.GetMaxHealth();
-        return $"{health:F0}/{max:F0}";
+        output = $"{health:F0}/{max:F0}";
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Health";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Health";
+        return true;
+    }
 }

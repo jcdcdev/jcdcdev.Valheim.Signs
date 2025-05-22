@@ -1,17 +1,20 @@
-﻿using jcdcdev.Valheim.Core.Extensions;
+﻿namespace jcdcdev.Valheim.Signs.Converters;
 
-namespace jcdcdev.Valheim.Signs.Converters;
-
-public class PlayerStaminaSign : IAmADynamicSign
+public class PlayerStaminaSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.InvariantEquals("stamina");
+    protected override string Tag => "stamina";
 
-    public string? GetSignText(Sign sign, string input)
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var stamina = Player.m_localPlayer.m_stamina;
         var max = Player.m_localPlayer.m_maxStamina;
-        return $"{stamina:F0}/{max:F0}";
+        output = $"{stamina:F0}/{max:F0}";
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Stamina";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Stamina";
+        return true;
+    }
 }

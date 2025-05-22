@@ -1,12 +1,19 @@
-﻿using jcdcdev.Valheim.Core.Extensions;
+﻿namespace jcdcdev.Valheim.Signs.Converters;
 
-namespace jcdcdev.Valheim.Signs.Converters;
-
-public class ComfortSign : IAmADynamicSign
+public class ComfortSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => Player.m_localPlayer != null && input.InvariantEquals("comfort");
+    public override bool CanConvert(Sign sign, string input) => base.CanConvert(sign, input) && Player.m_localPlayer != null;
+    protected override string Tag => "comfort";
 
-    public string? GetSignText(Sign sign, string input) => Player.m_localPlayer?.GetComfortLevel().ToString();
+    protected override bool GetText(Sign sign, string input, out string? output)
+    {
+        output = "Comfort";
+        return true;
+    }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Comfort";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = Player.m_localPlayer?.GetComfortLevel().ToString();
+        return true;
+    }
 }

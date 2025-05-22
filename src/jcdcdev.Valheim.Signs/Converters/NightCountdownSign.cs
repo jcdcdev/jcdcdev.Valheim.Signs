@@ -3,22 +3,31 @@ using jcdcdev.Valheim.Core.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class NightCountdownSign : IAmADynamicSign
+public class NightCountdownSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("nightCountdown");
+    protected override string Tag => "nightCountdown";
 
-    public string? GetSignText(Sign sign, string input)
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var isSeconds = input.ToLowerInvariant().Replace("nightCountdown", string.Empty).Contains("s");
         var time = TimeExtensions.CalculateTimeLeftInDay();
         var endTime = TimeSpan.Zero;
         if (time == endTime)
         {
-            return "-";
+            output = "-";
+            return true;
         }
 
         var adjusted = ConvertToRealTime(time, endTime);
-        return isSeconds ? adjusted.ToString(@"mm\:ss") : adjusted.ToString(@"mm");
+        output = isSeconds ? adjusted.ToString(@"mm\:ss") : adjusted.ToString(@"mm");
+        return true;
+    }
+
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Time left until night";
+        return true;
     }
 
     private static TimeSpan ConvertToRealTime(TimeSpan current, TimeSpan end)
@@ -30,6 +39,4 @@ public class NightCountdownSign : IAmADynamicSign
         var remainingTimeSpan = TimeSpan.FromSeconds(remainingRealSeconds);
         return remainingTimeSpan;
     }
-
-    public string? GetSignHoverText(Sign sign, string input) => "Time left until night";
 }

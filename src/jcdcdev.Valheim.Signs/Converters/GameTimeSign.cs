@@ -1,23 +1,29 @@
-﻿using System;
-using jcdcdev.Valheim.Core.Extensions;
+﻿using jcdcdev.Valheim.Core.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class GameTimeSign : IAmADynamicSign
+public class GameTimeSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWith("gameTime", StringComparison.InvariantCultureIgnoreCase);
 
-    public string? GetSignText(Sign sign, string input)
+    protected override string Tag => "gameTime";
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var time = TimeExtensions.ServerTimeNow();
         if (input.Contains("emoji"))
         {
-            return TimeExtensions.ToEmojiClock(time);
+            output = TimeExtensions.ToEmojiClock(time);
+            return true;
         }
 
         var format = TimeExtensions.GetTimeFormat(input);
-        return time.ToString(format);
+        output = time.ToString(format);
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Game Time";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Game Time";
+        return true;
+    }
 }

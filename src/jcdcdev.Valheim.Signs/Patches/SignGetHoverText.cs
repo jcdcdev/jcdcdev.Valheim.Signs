@@ -14,10 +14,22 @@ public static class SignGetHoverText
         Logger.LogDebug("SignGetHoverText.Postfix");
         try
         {
-            var originalText = __result;
+            string originalText;
+            if (SignsPlugin.IsAzuSignsInstalled)
+            {
+                originalText = __result;
+            }
+            else
+            {
+                var view = __instance.m_nview;
+                var zdo = view.GetZDO();
+                var text = zdo.GetString("text");
+                originalText = text;
+            }
+
             if (!SignsPlugin.Instance.Client_GetSignHoverText(__instance, originalText, out var output))
             {
-                Logger.LogDebug("SignGetHoverText.Postfix: No output");
+                Logger.LogWarning("SignGetHoverText.Postfix: No output");
                 return;
             }
 

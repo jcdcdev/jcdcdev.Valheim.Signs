@@ -2,11 +2,19 @@
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class FuzzyTime : IAmADynamicSign
+public class FuzzyTime : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("fuzzyTime");
 
-    public string? GetSignText(Sign sign, string input) => TimeExtensions.GetFuzzyTime();
+    protected override string Tag => "fuzzyTime";
+    protected override bool GetText(Sign sign, string input, out string? output)
+    {
+        output = TimeExtensions.GetFuzzyTime();
+        return true;
+    }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Fuzzy Time";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Fuzzy Time";
+        return true;
+    }
 }

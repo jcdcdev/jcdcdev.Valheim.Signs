@@ -1,16 +1,14 @@
-﻿using System;
-using jcdcdev.Valheim.Core.Extensions;
+﻿namespace jcdcdev.Valheim.Signs.Converters;
 
-namespace jcdcdev.Valheim.Signs.Converters;
-
-public class DeathLeaderboardSign : IAmADynamicSign
+public class DeathLeaderboardSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("deathBoard");
 
-    public string? GetSignText(Sign sign, string input)
+    protected override string Tag => "deathBoard";
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var take = 3;
-        var options = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var options = GetOptions(input);
         foreach (var option in options)
         {
             if (!int.TryParse(option, out var result))
@@ -23,8 +21,13 @@ public class DeathLeaderboardSign : IAmADynamicSign
         }
 
         var model = SignsPlugin.Instance.Client_GetOrRequestDeathLeaderboard();
-        return model?.GetSignText(take);
+        output = model?.GetSignText(take);
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Deaths Leaderboard";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Deaths Leaderboard";
+        return true;
+    }
 }

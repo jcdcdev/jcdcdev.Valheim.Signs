@@ -6,22 +6,26 @@ using jcdcdev.Valheim.Signs.Models;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class DeathCountSign : IAmADynamicSign
+public class DeathCountSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("deathCount");
+    protected override string Tag => "deathCount";
 
-    public string? GetSignText(Sign sign, string input)
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
-        var playerId = input.ToLowerInvariant().Replace("deathcount", string.Empty).Trim();
+        var options = GetOptions(input);
+        var playerId = options.FirstOrDefault();
         if (playerId.IsNullOrWhiteSpace())
         {
-            return Player.m_localPlayer?.GetDeathCount().ToString();
+            output = Player.m_localPlayer?.GetDeathCount().ToString();
+            return true;
         }
 
         var leaderboard = SignsPlugin.Instance.Client_GetOrRequestDeathLeaderboard();
         if (leaderboard == null)
         {
-            return Constants.ErrorMessage("Leaderboard not available");
+            output = Constants.ErrorMessage("Leaderboard not available");
+            return false;
         }
 
         PlayerDeathInfo? player;
@@ -34,8 +38,13 @@ public class DeathCountSign : IAmADynamicSign
             player = leaderboard.Players.FirstOrDefault(x => x.Name.InvariantEquals(playerId));
         }
 
-        return player == null ? Constants.ErrorMessage("Player not found") : $"{player.GetDeaths()}";
+        output = player == null ? Constants.ErrorMessage("Player not found") : $"{player.GetDeaths()}";
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Deaths Count";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Deaths Count";
+        return true;
+    }
 }

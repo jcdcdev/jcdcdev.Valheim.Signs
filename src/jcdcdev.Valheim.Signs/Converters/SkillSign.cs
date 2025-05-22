@@ -1,55 +1,26 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using jcdcdev.Valheim.Core;
 using jcdcdev.Valheim.Core.Extensions;
+using jcdcdev.Valheim.Signs.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class SkillSign : IAmADynamicSign
+public class SkillSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("skill");
+    protected override string Tag => "skill";
 
-    public string? GetSignText(Sign sign, string input)
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
-        var key = $"{sign.GetInstanceID()}-{input}";
-        if (SignsPlugin.Instance.TryGetCacheItem<string>(key, out var cachedOutput))
-        {
-            SignsPlugin.Instance.Logger.LogDebug($"Using cached output for {input}: {cachedOutput}");
-            return cachedOutput;
-        }
-
-        if (!TryGetSignText(input, out var output))
-        {
-            SignsPlugin.Instance.Logger.LogDebug($"Failed to get sign text for {input}");
-            if (string.IsNullOrWhiteSpace(cachedOutput))
-            {
-                return output;
-            }
-
-            SignsPlugin.Instance.Logger.LogDebug($"Using cached output for {input}:\n\n{cachedOutput}");
-            return output;
-        }
-
-        SignsPlugin.Instance.AddCacheItem(key, output, TimeSpan.FromMinutes(5));
-        return output;
-    }
-
-    private static bool TryGetSignText(string input, out string? result)
-    {
-        result = null;
-        var options = input
-            .ToLowerInvariant()
-            .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-            .Skip(1)
-            .ToList();
+        output = null;
+        var options = GetOptions(input);
 
         var skillInput = options.FirstOrDefault();
         options.Remove(skillInput);
 
-        var skill = GetSkill(skillInput);
+        var skill = SkillsExtensions.Parse(skillInput);
         if (skill == Skills.SkillType.None)
         {
-            result = Constants.ErrorMessage("Invalid skill");
+            output = Constants.ErrorMessage("Invalid skill");
             return false;
         }
 
@@ -72,7 +43,7 @@ public class SkillSign : IAmADynamicSign
         {
             if (options.Count > 1)
             {
-                result = Constants.ErrorMessage("Too many options");
+                output = Constants.ErrorMessage("Too many options");
                 return false;
             }
 
@@ -82,12 +53,12 @@ public class SkillSign : IAmADynamicSign
         var player = GetPlayer(playerId);
         if (player == null)
         {
-            result = Constants.ErrorMessage($"Player not found: {playerId}");
+            output = Constants.ErrorMessage($"Player not found: {playerId}");
             return false;
         }
 
         var value = player.GetSkillLevel(skill);
-        var output = string.Empty;
+        output = string.Empty;
         if (withEmoji)
         {
             output = $"{skill.ToEmoji()} ";
@@ -99,19 +70,24 @@ public class SkillSign : IAmADynamicSign
         }
 
         output += $"{value:F0}";
-        result = output;
         return true;
     }
 
-    private static Skills.SkillType GetSkill(string? input)
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
     {
-        if (!Enum.TryParse(input, true, out Skills.SkillType skill))
+        var options = GetOptions(input);
+        var skillInput = options.FirstOrDefault();
+        var skill = SkillsExtensions.Parse(skillInput);
+        if (skill == Skills.SkillType.None)
         {
-            return Skills.SkillType.None;
+            output = Constants.ErrorMessage("Invalid skill");
+            return false;
         }
 
-        return skill;
+        output = skill.ToString();
+        return true;
     }
+
 
     private static Player? GetPlayer(string playerId)
     {
@@ -145,11 +121,5 @@ public class SkillSign : IAmADynamicSign
         }
 
         return player;
-    }
-
-    public string? GetSignHoverText(Sign sign, string input)
-    {
-        var skill = GetSkill(input);
-        return skill == Skills.SkillType.None ? Constants.DefaultHoverError : skill.ToString();
     }
 }

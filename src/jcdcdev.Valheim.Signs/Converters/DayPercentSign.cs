@@ -2,21 +2,28 @@
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class DayPercentSign : IAmADynamicSign
+public class DayPercentSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("dayPercent");
+    protected override string Tag => "dayPercent";
 
-    public string? GetSignText(Sign sign, string input)
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var fraction = TimeExtensions.SmoothDayFraction;
         if (fraction is <= 0.25f or >= 0.75f)
         {
-            return "-";
+            output = "-";
+            return true;
         }
 
         var percent = (fraction - 0.25f) * 100 / 0.5f;
-        return $"{percent:F0}%";
+        output = $"{percent:F0}%";
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Day percentage";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Day percentage";
+        return true;
+    }
 }

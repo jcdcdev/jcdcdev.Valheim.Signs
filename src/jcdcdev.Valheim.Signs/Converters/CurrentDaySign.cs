@@ -1,13 +1,21 @@
-﻿using System;
-using jcdcdev.Valheim.Core.Extensions;
+﻿using jcdcdev.Valheim.Core.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class CurrentDaySign : IAmADynamicSign
+public class CurrentDaySign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWith("currentDay", StringComparison.InvariantCultureIgnoreCase);
+    protected override string Tag => "currentDay";
 
-    public string? GetSignText(Sign sign, string input) => TimeExtensions.CurrentDay.ToString();
 
-    public string? GetSignHoverText(Sign sign, string input) => "Current Day";
+    protected override bool GetText(Sign sign, string input, out string? output)
+    {
+        output = TimeExtensions.CurrentDay.ToString();
+        return true;
+    }
+
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Current Day";
+        return true;
+    }
 }

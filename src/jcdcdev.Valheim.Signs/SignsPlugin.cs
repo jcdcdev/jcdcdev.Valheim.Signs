@@ -36,6 +36,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     protected override string PluginId => Constants.PluginId;
     public ConfigEntry<int> ItemsCacheExpireTime = null!;
     public ConfigEntry<int> SmelterRadius = null!;
+    public ConfigEntry<int> SmelterCacheExpireTime = null!;
     public ConfigEntry<int> ItemsMaxRadius = null!;
     public ConfigEntry<int> DeathLeaderboardCacheExpireTime = null!;
 
@@ -51,6 +52,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         };
 
         SmelterRadius = Config.Bind("Smelter", "Radius", 10, new ConfigDescription("The radius to search for smelters", null, adminOnly));
+        SmelterCacheExpireTime = Config.Bind("Smelter", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache smelter data on clients", null, adminOnly));
         ItemsMaxRadius = Config.Bind("Items", "MaxRadius", 128, new ConfigDescription("The maximum radius users can configure to search for items", null, adminOnly));
         ItemsCacheExpireTime = Config.Bind("Items", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache item counts on clients", null, adminOnly));
         DeathLeaderboardCacheExpireTime =
@@ -146,6 +148,11 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         try
         {
             var originalValues = Client_GetTokenValue(signText);
+            if (!originalValues.Any())
+            {
+                return false;
+            }
+
             foreach (var originalValue in originalValues)
             {
                 if (!TryGetSignText(sign, originalValue, out var result) || result == null)
@@ -156,16 +163,17 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
                 output = output.Replace("{{" + originalValue + "}}", result);
             }
 
-            return output != signText;
+            return true;
         }
         catch (Exception ex)
         {
+            output = string.Empty;
             Logger.LogIssue(ex, "Error getting sign text");
             return false;
         }
     }
 
-    private IEnumerable<string> Client_GetTokenValue(string originalText)
+    private List<string> Client_GetTokenValue(string originalText)
     {
         try
         {
@@ -436,8 +444,5 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         _smelters.Add(id, dto);
     }
 
-    public void Client_UpdateDeathLeaderboard(PlayerDeathLeaderBoard model)
-    {
-        AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model, TimeSpan.FromSeconds(DeathLeaderboardCacheExpireTime.Value));
-    }
+    public void Client_UpdateDeathLeaderboard(PlayerDeathLeaderBoard model) { AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model, TimeSpan.FromSeconds(DeathLeaderboardCacheExpireTime.Value)); }
 }

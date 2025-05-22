@@ -1,12 +1,18 @@
-﻿using System;
+﻿namespace jcdcdev.Valheim.Signs.Converters;
 
-namespace jcdcdev.Valheim.Signs.Converters;
-
-public class OnlineCountSign : IAmADynamicSign
+public class OnlineCountSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.Equals("onlineCount", StringComparison.InvariantCultureIgnoreCase);
+    protected override string Tag => "onlineCount";
 
-    public string? GetSignText(Sign sign, string input) => $"{ZNet.instance.GetPlayerList().Count}";
+    protected override bool GetText(Sign sign, string input, out string? output)
+    {
+        output = $"{ZNet.instance.GetPlayerList().Count}";
+        return true;
+    }
 
-    public string GetSignHoverText(Sign sign, string input) => "Online Players";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Online Players";
+        return true;
+    }
 }

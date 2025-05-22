@@ -1,20 +1,21 @@
 using System;
 using System.Linq;
 using System.Text;
-using jcdcdev.Valheim.Core.Extensions;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class SmelterContentSign : IAmADynamicSign
+public class SmelterContentSign : SimpleSign
 {
-    private const string Tag = "smelterContent";
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant(Tag);
+    protected override TimeSpan ExpireSignTextAfter => TimeSpan.FromSeconds(SignsPlugin.Instance.SmelterCacheExpireTime.Value);
 
-    public string? GetSignText(Sign sign, string input)
+    protected override string Tag => "smelterContent";
+    protected override bool UseCache => true;
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
-        var options = input.ToLowerInvariant().Replace(Tag.ToLowerInvariant(), "").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        var options = GetOptions(input);
         var showLabel = options.All(x => x != "l");
         var showFuel = options.Any(x => x == "f");
         var showOre = options.Any(x => x == "o");
@@ -29,14 +30,16 @@ public class SmelterContentSign : IAmADynamicSign
         var dto = SignsPlugin.Instance.Client_GetClosestSmelter(sign.transform.position);
         if (dto == null)
         {
-            return Constants.ErrorMessage($"No smelter found within {SignsPlugin.Instance.SmelterRadius.Value} blocks");
+            output = Constants.ErrorMessage($"No smelter found within {SignsPlugin.Instance.SmelterRadius.Value} blocks");
+            return false;
         }
 
         var smelters = Object.FindObjectsByType<Smelter>(FindObjectsSortMode.InstanceID) ?? Array.Empty<Smelter>();
         var smelter = smelters.FirstOrDefault(x => x.GetInstanceID() == dto.Id);
         if (smelter == null)
         {
-            return Constants.ErrorMessage("Smelter Component not found with id: " + dto.Id);
+            output = Constants.ErrorMessage("Smelter Component not found with id: " + dto.Id);
+            return false;
         }
 
         var ore = smelter.GetQueueSize();
@@ -65,8 +68,13 @@ public class SmelterContentSign : IAmADynamicSign
             sb.Append($"{ore}\n");
         }
 
-        return sb.ToString();
+        output = sb.ToString();
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Smelter Content";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Smelter Content";
+        return true;
+    }
 }

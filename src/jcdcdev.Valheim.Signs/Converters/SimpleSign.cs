@@ -32,7 +32,7 @@ public abstract class SimpleSign : IAmADynamicSign
     protected abstract bool GetText(Sign sign, string input, out string? output);
     protected abstract bool GetHoverText(Sign sign, string input, out string? output);
 
-    protected virtual bool UseCache => true;
+    protected virtual bool UseCache => false;
     protected virtual TimeSpan ExpireSignTextAfter => TimeSpan.FromSeconds(30);
     protected virtual TimeSpan ExpireSignHoverTextAfter => TimeSpan.FromSeconds(30);
     private string GetCacheKey(Sign sign, string input) => $"sign:{sign.GetInstanceID()}:text:{input}".Replace(" ", "");

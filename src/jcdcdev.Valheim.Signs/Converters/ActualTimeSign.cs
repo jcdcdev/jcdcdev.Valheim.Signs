@@ -3,21 +3,28 @@ using jcdcdev.Valheim.Core.Extensions;
 
 namespace jcdcdev.Valheim.Signs.Converters;
 
-public class ActualTimeSign : IAmADynamicSign
+public class ActualTimeSign : SimpleSign
 {
-    public bool CanConvert(Sign sign, string input) => input.StartsWithInvariant("actualTime");
 
-    public string? GetSignText(Sign sign, string input)
+    protected override string Tag => "actualTime";
+
+    protected override bool GetText(Sign sign, string input, out string? output)
     {
         var time = TimeExtensions.LocalNow(TimeZoneInfo.Local);
         if (input.Contains("emoji"))
         {
-            return TimeExtensions.ToEmojiClock(time);
+            output = TimeExtensions.ToEmojiClock(time);
+            return true;
         }
 
         var format = TimeExtensions.GetTimeFormat(input);
-        return time.ToString(format);
+        output = time.ToString(format);
+        return true;
     }
 
-    public string? GetSignHoverText(Sign sign, string input) => "Actual Time";
+    protected override bool GetHoverText(Sign sign, string input, out string? output)
+    {
+        output = "Actual Time";
+        return true;
+    }
 }
