@@ -47,7 +47,7 @@ Displays the current player's number of deaths on this world.
 |------------|---------------------------------------------------------------------------|-----------------------|----------------|
 | `playerId` | The player's name or ID.<br/>Defaults to the current player if left blank | `{{deathCount jcdc}}` | `3`            |
 
-You can change each player's death  by editing the `Offset` value stored in `BepInEx/config/jcdcdev.Valheim.Signs/death-leaderboard.json`
+You can change each player's death by editing the `Offset` value stored in `BepInEx/config/jcdcdev.Valheim.Signs/death-leaderboard.json`
 
 ### Death Leaderboard
 
@@ -61,7 +61,19 @@ Displays the players with the most deaths on this world.
 |---------|---------------------------------------------------------------|--------------------|-----------------------------|
 | `count` | The number of players to show<br/>Defaults to 3 if left blank | `{{deathBoard 2}}` | `1. JIM: 3`<br/>`2. MIJ: 1` |
 
-You can change each player's death  by editing the `Offset` value stored in `BepInEx/config/jcdcdev.Valheim.Signs/death-leaderboard.json`
+You can change each player's death by editing the `Offset` value stored in `BepInEx/config/jcdcdev.Valheim.Signs/death-leaderboard.json`
+
+### Total Server Deaths
+
+Displays the total number of deaths on this world.
+
+`{{totalDeaths}}`
+
+![In game screenshot of the Total Server Deaths sign](https://raw.githubusercontent.com/jcdcdev/jcdcdev.Valheim.Signs/main/docs/deaths-total.png)
+
+| Option | Description       | Example             | Example Output |
+|--------|-------------------|---------------------|----------------|
+| `l`    | Removes the label | `{{totalDeaths l}}` | `3`            |
 
 ### Comfort
 
