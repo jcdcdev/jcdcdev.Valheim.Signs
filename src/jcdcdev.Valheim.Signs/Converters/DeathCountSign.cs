@@ -34,7 +34,7 @@ public class DeathCountSign : IAmADynamicSign
             player = leaderboard.Players.FirstOrDefault(x => x.Name.InvariantEquals(playerId));
         }
 
-        return player == null ? Constants.ErrorMessage("Player not found") : player.Deaths.ToString();
+        return player == null ? Constants.ErrorMessage("Player not found") : $"{player.GetDeaths()}";
     }
 
     public string? GetSignHoverText(Sign sign, string input) => "Deaths Count";

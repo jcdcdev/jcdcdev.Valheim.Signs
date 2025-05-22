@@ -14,11 +14,9 @@ using jcdcdev.Valheim.Signs.Converters;
 using jcdcdev.Valheim.Signs.Extensions;
 using jcdcdev.Valheim.Signs.Models;
 using jcdcdev.Valheim.Signs.RPC;
-using Jotunn;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace jcdcdev.Valheim.Signs;
 
@@ -33,12 +31,13 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
     public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
     private readonly Dictionary<int, GameObjectDto> _smelters = new();
-    private string LeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
+    private string DeathLeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
     protected override string PluginId => Constants.PluginId;
     public ConfigEntry<int> ItemsCacheExpireTime = null!;
     public ConfigEntry<int> SmelterRadius = null!;
     public ConfigEntry<int> ItemsMaxRadius = null!;
+    public ConfigEntry<int> DeathLeaderboardCacheExpireTime = null!;
 
     protected override void OnAwake()
     {
@@ -46,23 +45,47 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         DeathLeaderboardUpdateRequest.Initialise(NetworkManager.Instance);
         DeathLeaderboardUpdateResponse.Initialise(NetworkManager.Instance);
 
-        var adminOnly = new ConfigurationManagerAttributes { IsAdminOnly = true };
+        var adminOnly = new ConfigurationManagerAttributes
+        {
+            IsAdminOnly = true
+        };
+
         SmelterRadius = Config.Bind("Smelter", "Radius", 10, new ConfigDescription("The radius to search for smelters", null, adminOnly));
         ItemsMaxRadius = Config.Bind("Items", "MaxRadius", 128, new ConfigDescription("The maximum radius users can configure to search for items", null, adminOnly));
-
-        ItemsCacheExpireTime = Config.Bind("Items", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache item counts", null, adminOnly));
+        ItemsCacheExpireTime = Config.Bind("Items", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache item counts on clients", null, adminOnly));
+        DeathLeaderboardCacheExpireTime =
+            Config.Bind("DeathLeaderboard", "CacheExpireTime", 30, new ConfigDescription("The time in seconds to cache the death leaderboard on clients", null, adminOnly));
         AddSigns();
         EnsureLeaderboardFileExists();
     }
 
     private void EnsureLeaderboardFileExists()
     {
-        if (File.Exists(LeaderboardPath))
+        if (File.Exists(DeathLeaderboardPath))
         {
+            var model = Server_ReadDeathLeaderboardFile();
+            if (model == null)
+            {
+                Logger.LogWarning("Failed to read death leaderboard file.");
+                return;
+            }
+
+            Logger.LogInfo($"Loaded death leaderboard file\n\n{model.GetSignText()}\n\n");
+
+            try
+            {
+                Server_WriteDeathLeaderboardFile(model);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogIssue(ex, "Failed to write death leaderboard file.");
+                return;
+            }
+
             return;
         }
 
-        WriteJsonToFile(PlayerDeathLeaderBoard.Empty, LeaderboardPath);
+        WriteJsonToFile(PlayerDeathLeaderBoard.Empty, DeathLeaderboardPath);
     }
 
     private void AddSigns()
@@ -239,14 +262,14 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
 
         try
         {
-            var path = LeaderboardPath;
+            var path = DeathLeaderboardPath;
             if (!File.Exists(path))
             {
                 Logger.LogWarning("Death Leaderboard file not found.");
                 return null;
             }
 
-            var model = ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
+            var model = JsonHelper.ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
             if (model == null)
             {
                 Logger.LogWarning("Death Leaderboard file is empty.");
@@ -286,8 +309,7 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     {
         try
         {
-            var path = LeaderboardPath;
-            var model = ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
+            var model = Server_ReadDeathLeaderboardFile();
             if (model == null)
             {
                 Logger.LogWarning("Death Leaderboard file not found.");
@@ -302,9 +324,15 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             }
             else
             {
-                if (player.Deaths == data.Deaths)
+                if (data.Deaths == player.Deaths)
                 {
-                    Logger.LogDebug("Player death count is the same. No update needed.");
+                    Logger.LogDebug($"Latest Update from Player {player.Name} ({player.Id}) has the same death count as server data. Ignoring update.");
+                    return;
+                }
+
+                if (data.Deaths < player.Deaths)
+                {
+                    Logger.LogWarning($"Latest Update from Player {player.Name} ({player.Id}) has a lower death count than server data. Ignoring update.");
                     return;
                 }
 
@@ -313,14 +341,26 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             }
 
             model.Players = model.Players.OrderByDescending(x => x.Deaths).ToList();
-            model.Updated = DateTime.UtcNow;
             DeathLeaderboardUpdateResponse.SendAll(model);
-            WriteJsonToFile(model, path);
+            Server_WriteDeathLeaderboardFile(model);
         }
         catch (Exception ex)
         {
             Logger.LogIssue(ex, "Error updating death leaderboard");
         }
+    }
+
+    private void Server_WriteDeathLeaderboardFile(PlayerDeathLeaderBoard model)
+    {
+        model.Version = VersionInfo.Version;
+        model.Updated = DateTime.UtcNow;
+        WriteJsonToFile(model, DeathLeaderboardPath);
+    }
+
+    private PlayerDeathLeaderBoard? Server_ReadDeathLeaderboardFile()
+    {
+        var path = DeathLeaderboardPath;
+        return JsonHelper.ReadJsonFromFile<PlayerDeathLeaderBoard>(path);
     }
 
     public void Client_SendDeathUpdateRequest(Player player)
@@ -394,5 +434,10 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
             Z = smelter.transform.position.z
         };
         _smelters.Add(id, dto);
+    }
+
+    public void Client_UpdateDeathLeaderboard(PlayerDeathLeaderBoard model)
+    {
+        AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model, TimeSpan.FromSeconds(DeathLeaderboardCacheExpireTime.Value));
     }
 }
