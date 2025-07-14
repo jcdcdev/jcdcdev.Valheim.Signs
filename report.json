@@ -9,8 +9,8 @@
           "Dependencies": [
             {
               "Name": "JotunnLib",
-              "ResolvedVersion": "2.24.3",
-              "LatestVersion": "2.25.0",
+              "ResolvedVersion": "2.25.0",
+              "LatestVersion": "2.26.0",
               "UpgradeSeverity": "Minor"
             }
           ]
