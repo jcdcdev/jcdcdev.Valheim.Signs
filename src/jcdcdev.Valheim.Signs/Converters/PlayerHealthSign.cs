@@ -1,4 +1,6 @@
-﻿namespace jcdcdev.Valheim.Signs.Converters;
+﻿using jcdcdev.Valheim.Signs.Extensions;
+
+namespace jcdcdev.Valheim.Signs.Converters;
 
 public class PlayerHealthSign : SimpleSign
 {
@@ -6,8 +8,14 @@ public class PlayerHealthSign : SimpleSign
 
     protected override bool GetText(Sign sign, string input, out string? output)
     {
-        var health = Player.m_localPlayer.GetHealth();
-        var max = Player.m_localPlayer.GetMaxHealth();
+        if (!PlayerExtensions.TryGetLocalPlayer(out var player) || player == null)
+        {
+            output = null;
+            return false;
+        }
+
+        var health = player.GetHealth();
+        var max = player.GetMaxHealth();
         output = $"{health:F0}/{max:F0}";
         return true;
     }

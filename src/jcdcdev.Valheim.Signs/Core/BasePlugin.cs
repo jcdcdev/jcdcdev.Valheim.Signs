@@ -18,6 +18,8 @@ namespace jcdcdev.Valheim.Core;
 public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : class
 {
     private static TPlugin? _instance;
+
+    private readonly IDictionary<string, CacheEntry> _cache = new ConcurrentDictionary<string, CacheEntry>();
     public readonly ISimpleRPC BadRequest = new BadRequest();
 
     public new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("Signs");
@@ -58,14 +60,6 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         {
             Directory.CreateDirectory(ConfigBasePath);
         }
-    }
-
-    private readonly IDictionary<string, CacheEntry> _cache = new ConcurrentDictionary<string, CacheEntry>();
-
-    private record CacheEntry(object? Value, DateTime ExpiryTime)
-    {
-        public object? Value { get; } = Value;
-        public DateTime ExpiryTime { get; } = ExpiryTime;
     }
 
     public void AddCacheItem<TItem>(string key, TItem? value, TimeSpan? expiry = null) where TItem : class
@@ -121,5 +115,11 @@ public abstract class BasePlugin<TPlugin> : BaseUnityPlugin where TPlugin : clas
         {
             Logger.LogIssue(ex, $"Error writing {model.GetType().Name} to file");
         }
+    }
+
+    private record CacheEntry(object? Value, DateTime ExpiryTime)
+    {
+        public object? Value { get; } = Value;
+        public DateTime ExpiryTime { get; } = ExpiryTime;
     }
 }

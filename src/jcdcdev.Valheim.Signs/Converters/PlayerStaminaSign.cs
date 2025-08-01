@@ -1,4 +1,6 @@
-﻿namespace jcdcdev.Valheim.Signs.Converters;
+﻿using jcdcdev.Valheim.Signs.Extensions;
+
+namespace jcdcdev.Valheim.Signs.Converters;
 
 public class PlayerStaminaSign : SimpleSign
 {
@@ -6,8 +8,14 @@ public class PlayerStaminaSign : SimpleSign
 
     protected override bool GetText(Sign sign, string input, out string? output)
     {
-        var stamina = Player.m_localPlayer.m_stamina;
-        var max = Player.m_localPlayer.m_maxStamina;
+        if (!PlayerExtensions.TryGetLocalPlayer(out var player) || player == null)
+        {
+            output = null;
+            return false;
+        }
+
+        var stamina = player.m_stamina;
+        var max = player.m_maxStamina;
         output = $"{stamina:F0}/{max:F0}";
         return true;
     }

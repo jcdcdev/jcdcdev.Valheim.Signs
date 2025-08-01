@@ -6,6 +6,12 @@ namespace jcdcdev.Valheim.Signs.Extensions;
 
 public static class PlayerExtensions
 {
+    public static bool TryGetLocalPlayer(out Player? foundPlayer)
+    {
+        foundPlayer = Player.m_localPlayer;
+        return foundPlayer != null;
+    }
+
     public static PlayerDeathInfo GetDeathInfo(this Player player)
     {
         var data = new PlayerDeathInfo

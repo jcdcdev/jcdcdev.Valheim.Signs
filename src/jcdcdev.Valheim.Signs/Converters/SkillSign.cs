@@ -38,7 +38,7 @@ public class SkillSign : SimpleSign
             withLabel = true;
         }
 
-        var playerId = Player.m_localPlayer.name;
+        var playerId = Player.m_localPlayer?.name;
         if (options.Any())
         {
             if (options.Count > 1)
@@ -89,11 +89,11 @@ public class SkillSign : SimpleSign
     }
 
 
-    private static Player? GetPlayer(string playerId)
+    private static Player? GetPlayer(string? playerId)
     {
         if (string.IsNullOrWhiteSpace(playerId))
         {
-            SignsPlugin.Instance.Logger.LogDebug($"PlayerId is null or empty, using local player");
+            SignsPlugin.Instance.Logger.LogDebug("PlayerId is null or empty, using local player");
             return Player.m_localPlayer;
         }
 

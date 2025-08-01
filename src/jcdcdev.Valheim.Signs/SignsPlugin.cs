@@ -27,18 +27,18 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
     public static readonly bool IsAzuSignsInstalled = Chainloader.PluginInfos.ContainsKey("Azumatt.AzuSigns");
 
     private static readonly List<IAmADynamicSign> DynamicSigns = new();
+    private readonly Dictionary<int, GameObjectDto> _smelters = new();
     public readonly ISimpleRPC DeathLeaderboardUpdateRequest = new DeathLeaderboardUpdateRequest();
     public readonly ISimpleRPC DeathLeaderboardUpdateResponse = new DeathLeaderboardUpdateResponse();
     public readonly ISimpleRPC DeathUpdate = new DeathUpdate();
-    private readonly Dictionary<int, GameObjectDto> _smelters = new();
+    public ConfigEntry<int> DeathLeaderboardCacheExpireTime = null!;
+    public ConfigEntry<int> ItemsCacheExpireTime = null!;
+    public ConfigEntry<int> ItemsMaxRadius = null!;
+    public ConfigEntry<int> SmelterCacheExpireTime = null!;
+    public ConfigEntry<int> SmelterRadius = null!;
     private string DeathLeaderboardPath => $"{ConfigBasePath}death-leaderboard.json";
 
     protected override string PluginId => Constants.PluginId;
-    public ConfigEntry<int> ItemsCacheExpireTime = null!;
-    public ConfigEntry<int> SmelterRadius = null!;
-    public ConfigEntry<int> SmelterCacheExpireTime = null!;
-    public ConfigEntry<int> ItemsMaxRadius = null!;
-    public ConfigEntry<int> DeathLeaderboardCacheExpireTime = null!;
 
     protected override void OnAwake()
     {
@@ -444,5 +444,5 @@ public class SignsPlugin : BasePlugin<SignsPlugin>
         _smelters.Add(id, dto);
     }
 
-    public void Client_UpdateDeathLeaderboard(PlayerDeathLeaderBoard model) { AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model, TimeSpan.FromSeconds(DeathLeaderboardCacheExpireTime.Value)); }
+    public void Client_UpdateDeathLeaderboard(PlayerDeathLeaderBoard model) => AddCacheItem(Constants.CacheKeys.DeathLeaderboard, model, TimeSpan.FromSeconds(DeathLeaderboardCacheExpireTime.Value));
 }

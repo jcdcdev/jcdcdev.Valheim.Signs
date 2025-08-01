@@ -5,7 +5,6 @@ namespace jcdcdev.Valheim.Signs.Converters;
 
 public class ActualTimeSign : SimpleSign
 {
-
     protected override string Tag => "actualTime";
 
     protected override bool GetText(Sign sign, string input, out string? output)

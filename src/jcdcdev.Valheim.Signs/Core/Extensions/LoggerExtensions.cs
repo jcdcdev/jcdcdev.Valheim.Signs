@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using BepInEx.Logging;
 using jcdcdev.Valheim.Signs;
+using Logger = Jotunn.Logger;
 
 namespace jcdcdev.Valheim.Core.Extensions;
 
 public static class LoggerExtensions
 {
-    public static void LogIssue(Exception ex, string? title = null) { Jotunn.Logger.LogError(GetReportText(ex, title)); }
+    private const string GitHubUrl = "https://github.com/jcdcdev/jcdcdev.Valheim.Signs";
+    public static void LogIssue(Exception ex, string? title = null) => Logger.LogError(GetReportText(ex, title));
 
-    public static void LogIssue(this ManualLogSource logger, Exception ex, string? title = null) { logger.LogError(GetReportText(ex, title)); }
+    public static void LogIssue(this ManualLogSource logger, Exception ex, string? title = null) => logger.LogError(GetReportText(ex, title));
 
     private static string GetReportText(Exception ex, string? titleText = null)
     {
@@ -35,11 +37,11 @@ public static class LoggerExtensions
         var report = new StringBuilder();
 
         report.AppendLine();
-        report.AppendHeader("ERROR REPORT", bold: true);
+        report.AppendHeader("ERROR REPORT", true);
         report.AppendLine();
         report.AppendLine(summary);
         report.AppendLine();
-        report.AppendHeader("HELP & SUPPORT", bold: true);
+        report.AppendHeader("HELP & SUPPORT", true);
         report.AppendLine();
         report.AppendLine("Please check for existing issues or create a new issue on GitHub.");
         report.AppendLine();
@@ -50,12 +52,9 @@ public static class LoggerExtensions
         return report.ToString();
     }
 
-    private static string GetSearchIssueUrl(string? title)
-    {
-        return new UriBuilder($"{GitHubUrl}/issues")
-            .AddQuery("q", Uri.EscapeUriString($"is:issue+is:open+{title}"))
-            .ToUriString();
-    }
+    private static string GetSearchIssueUrl(string? title) => new UriBuilder($"{GitHubUrl}/issues")
+        .AddQuery("q", Uri.EscapeUriString($"is:issue+is:open+{title}"))
+        .ToUriString();
 
     private static string GetCreateIssueUrl(string title = "An error occurred")
     {
@@ -71,6 +70,4 @@ public static class LoggerExtensions
             .AddQuery(query)
             .ToUriString();
     }
-
-    private const string GitHubUrl = "https://github.com/jcdcdev/jcdcdev.Valheim.Signs";
 }

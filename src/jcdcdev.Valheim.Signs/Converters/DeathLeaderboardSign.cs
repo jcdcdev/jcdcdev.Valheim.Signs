@@ -2,7 +2,6 @@
 
 public class DeathLeaderboardSign : SimpleSign
 {
-
     protected override string Tag => "deathBoard";
 
     protected override bool GetText(Sign sign, string input, out string? output)

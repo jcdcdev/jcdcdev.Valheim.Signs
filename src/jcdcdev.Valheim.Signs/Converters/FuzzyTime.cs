@@ -4,8 +4,8 @@ namespace jcdcdev.Valheim.Signs.Converters;
 
 public class FuzzyTime : SimpleSign
 {
-
     protected override string Tag => "fuzzyTime";
+
     protected override bool GetText(Sign sign, string input, out string? output)
     {
         output = TimeExtensions.GetFuzzyTime();

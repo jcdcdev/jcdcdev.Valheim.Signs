@@ -15,7 +15,7 @@ public class ContainerContentSign : SimpleSign
 
     protected override bool GetHoverText(Sign sign, string input, out string? output)
     {
-        output = $"Container Count";
+        output = "Container Count";
         return true;
     }
 

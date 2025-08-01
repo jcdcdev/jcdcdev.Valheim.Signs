@@ -16,6 +16,7 @@ Simply place any sign and set the text to one of the following options, e.g `{{o
 - [Online Count](#online-count)
 - [Death Count](#death-count)
 - [Death Leaderboard](#death-leaderboard)
+- [Total Server Deaths](#total-server-deaths)
 - [Comfort](#comfort)
 - [Stamina](#stamina)
 - [Health](#health)

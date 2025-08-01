@@ -4,7 +4,6 @@ namespace jcdcdev.Valheim.Signs.Converters;
 
 public class GameTimeSign : SimpleSign
 {
-
     protected override string Tag => "gameTime";
 
     protected override bool GetText(Sign sign, string input, out string? output)

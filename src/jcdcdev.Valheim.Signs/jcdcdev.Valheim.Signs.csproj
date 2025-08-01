@@ -11,11 +11,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JotunnLib" Version="2.26.0" />
+        <PackageReference Include="JotunnLib" Version="2.24.3"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="System.Data.DataSetExtensions"/>
     </ItemGroup>
 </Project>

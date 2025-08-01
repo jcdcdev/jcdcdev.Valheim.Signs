@@ -9,34 +9,12 @@ namespace jcdcdev.Valheim.Signs.Converters;
 
 public abstract class SimpleSign : IAmADynamicSign
 {
-    public virtual bool CanConvert(Sign sign, string input) => input.StartsWithInvariant(Tag);
-
     protected abstract string Tag { get; }
-
-    protected List<string> GetOptions(string input, bool skipFirst = true)
-    {
-        var options = input
-            .ToLowerInvariant()
-            .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-            .ToList();
-
-        if (skipFirst)
-        {
-            options.RemoveAt(0);
-        }
-
-        SignsPlugin.Instance.Logger.LogDebug($"Found {options.Count} options: {options.Select(x => x)}");
-        return options;
-    }
-
-    protected abstract bool GetText(Sign sign, string input, out string? output);
-    protected abstract bool GetHoverText(Sign sign, string input, out string? output);
 
     protected virtual bool UseCache => false;
     protected virtual TimeSpan ExpireSignTextAfter => TimeSpan.FromSeconds(30);
     protected virtual TimeSpan ExpireSignHoverTextAfter => TimeSpan.FromSeconds(30);
-    private string GetCacheKey(Sign sign, string input) => $"sign:{sign.GetInstanceID()}:text:{input}".Replace(" ", "");
-    private string GetHoverCacheKey(Sign sign, string input) => $"sign:{sign.GetInstanceID()}:hover:{input}".Replace(" ", "");
+    public virtual bool CanConvert(Sign sign, string input) => input.StartsWithInvariant(Tag);
 
     public string? GetSignText(Sign sign, string input)
     {
@@ -103,6 +81,27 @@ public abstract class SimpleSign : IAmADynamicSign
             return Constants.ErrorMessage("Error");
         }
     }
+
+    protected List<string> GetOptions(string input, bool skipFirst = true)
+    {
+        var options = input
+            .ToLowerInvariant()
+            .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+
+        if (skipFirst)
+        {
+            options.RemoveAt(0);
+        }
+
+        SignsPlugin.Instance.Logger.LogDebug($"Found {options.Count} options: {options.Select(x => x)}");
+        return options;
+    }
+
+    protected abstract bool GetText(Sign sign, string input, out string? output);
+    protected abstract bool GetHoverText(Sign sign, string input, out string? output);
+    private string GetCacheKey(Sign sign, string input) => $"sign:{sign.GetInstanceID()}:text:{input}".Replace(" ", "");
+    private string GetHoverCacheKey(Sign sign, string input) => $"sign:{sign.GetInstanceID()}:hover:{input}".Replace(" ", "");
 
     protected List<Container> GetContainers(Vector3 position, int searchRadius = 0)
     {
