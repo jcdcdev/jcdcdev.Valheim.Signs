@@ -9,7 +9,7 @@ public class ComfortSign : SimpleSign
 
     protected override bool GetText(Sign sign, string input, out string? output)
     {
-        output = "Comfort";
+        output = player.GetComfortLevel().ToString();
         return true;
     }
 
@@ -20,7 +20,7 @@ public class ComfortSign : SimpleSign
             output = null;
             return false;
         }
-        output = player.GetComfortLevel().ToString();
+        output = "Comfort";
         return true;
     }
 }
